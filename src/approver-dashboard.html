@@ -1,0 +1,1928 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0"
+    />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>
+      Approver Dashboard | Purbeck Ice Cream - Order Approval System
+    </title>
+  </head>
+  <body
+    x-data="{ page: 'approvals', 'loaded': true, 'darkMode': false, 'stickyMenu': false, 'sidebarToggle': false, 'scrollTop': false }"
+    x-init="
+         darkMode = JSON.parse(localStorage.getItem('darkMode'));
+         $watch('darkMode', value => localStorage.setItem('darkMode', JSON.stringify(value)))"
+    :class="{'dark bg-gray-900': darkMode === true}"
+  >
+    <!-- ===== Preloader Start ===== -->
+    <include src="./partials/preloader.html"></include>
+    <!-- ===== Preloader End ===== -->
+
+    <!-- ===== Page Wrapper Start ===== -->
+    <div class="flex h-screen overflow-hidden">
+      <!-- ===== Sidebar Start ===== -->
+      <include src="./partials/sidebar.html"></include>
+      <!-- ===== Sidebar End ===== -->
+
+      <!-- ===== Content Area Start ===== -->
+      <div
+        class="relative flex flex-1 flex-col overflow-x-hidden overflow-y-auto"
+      >
+        <!-- Small Device Overlay Start -->
+        <include src="./partials/overlay.html" />
+        <!-- Small Device Overlay End -->
+
+        <!-- ===== Header Start ===== -->
+        <include src="./partials/header.html" />
+        <!-- ===== Header End ===== -->
+
+        <!-- ===== Main Content Start ===== -->
+        <main>
+          <div
+            class="mx-auto max-w-(--breakpoint-2xl) p-4 md:p-6"
+            x-data="{
+              activeTab: 'pending',
+              selectedOrder: null,
+              reviewModal: false,
+              poNumberModal: false,
+              successModal: false,
+              delegateModal: false,
+              bulkApproveModal: false,
+              approving: false,
+              rejecting: false,
+              delegating: false,
+              poNumber: '',
+              rejectionReason: '',
+              approvalNotes: '',
+              actionType: '',
+              sendNotification: true,
+              delegateTo: '',
+              selectedOrders: [],
+
+              // Filters
+              filterCustomer: 'all',
+              filterUrgency: 'all',
+              filterTier: 'all',
+              searchQuery: '',
+              sortBy: 'date-desc',
+
+              allOrders: [
+                {
+                  id: 'ORD-2025-0342',
+                  customer: 'Hugo Boss',
+                  userId: 'HB-001',
+                  userName: 'Sarah Mitchell',
+                  userEmail: 'sarah.mitchell@hugoboss.com',
+                  date: '2025-01-06',
+                  time: '14:32',
+                  total: 2847.50,
+                  currency: 'GBP',
+                  reason: 'Budget Exceeded',
+                  details: 'Janitorial cost center (92% utilized)',
+                  urgency: 'high',
+                  items: [
+                    { sku: 'CLN-001', name: 'Industrial Floor Cleaner - 5L', qty: 24, price: 18.99, costCenter: 'Janitorial Supplies', budget: 8500, used: 7820 },
+                    { sku: 'CLN-045', name: 'Multi-Surface Sanitizer Spray', qty: 48, price: 12.50, costCenter: 'Janitorial Supplies', budget: 8500, used: 7820 },
+                    { sku: 'PPE-023', name: 'Nitrile Gloves (Box of 100)', qty: 30, price: 8.75, costCenter: 'Janitorial Supplies', budget: 8500, used: 7820 },
+                    { sku: 'CLN-089', name: 'Microfiber Cleaning Cloths (50pk)', qty: 12, price: 24.99, costCenter: 'Janitorial Supplies', budget: 8500, used: 7820 },
+                    { sku: 'WP-012', name: 'Industrial Paper Towels (12 rolls)', qty: 18, price: 32.50, costCenter: 'Janitorial Supplies', budget: 8500, used: 7820 }
+                  ],
+                  requiresPO: true,
+                  approvalTier: 2,
+                  history: [
+                    { action: 'Tier 1 Approved', by: 'John Davis', date: '2025-01-06 14:45', note: 'Stock levels critical' },
+                    { action: 'Created', by: 'Sarah Mitchell', date: '2025-01-06 14:32' }
+                  ],
+                  // NEW: Validation flags from Excel rules
+                  validationFlags: {
+                    exceedsBudget: true,
+                    exceedsMaxOrderAmount: false,
+                    hasProductAboveMaxPrice: false,
+                    belowMinOrderValue: false,
+                    requiresExecutiveApproval: false,
+                    hasProductRequiringApproval: false,
+                    hasCriticalItems: false,
+                    quantityViolations: [], // e.g., [{ sku: 'X', issue: 'Below min order qty' }]
+                    restrictionViolations: [] // e.g., [{ sku: 'Y', issue: 'Not on customer quicklist' }]
+                  }
+                },
+                {
+                  id: 'ORD-2025-0341',
+                  customer: 'Hugo Boss',
+                  userId: 'HB-008',
+                  userName: 'Marcus Webb',
+                  userEmail: 'marcus.webb@hugoboss.com',
+                  date: '2025-01-06',
+                  time: '11:20',
+                  total: 645.30,
+                  currency: 'GBP',
+                  reason: 'Exceeds Single Order Limit',
+                  details: 'Order over £500 threshold',
+                  urgency: 'medium',
+                  items: [
+                    { sku: 'STA-445', name: 'HP Toner Cartridges (Black, 4-pack)', qty: 6, price: 89.99, costCenter: 'Stationery', budget: 12000, used: 10200 },
+                    { sku: 'STA-102', name: 'A4 Premium Copy Paper (2500 sheets)', qty: 4, price: 28.50, costCenter: 'Stationery', budget: 12000, used: 10200 }
+                  ],
+                  requiresPO: false,
+                  approvalTier: 1,
+                  history: [
+                    { action: 'Created', by: 'Marcus Webb', date: '2025-01-06 11:20' }
+                  ]
+                },
+                {
+                  id: 'ORD-2025-0338',
+                  customer: 'Hugo Boss',
+                  userId: 'HB-003',
+                  userName: 'Jennifer Clarke',
+                  userEmail: 'jennifer.clarke@hugoboss.com',
+                  date: '2025-01-05',
+                  time: '16:45',
+                  total: 1240.00,
+                  currency: 'GBP',
+                  reason: 'Budget Warning',
+                  details: 'Uniform-Shirts approaching limit (94%)',
+                  urgency: 'medium',
+                  items: [
+                    { sku: 'UNI-201', name: 'Corporate Dress Shirts - White (M)', qty: 25, price: 22.50, costCenter: 'Uniform-Shirts', budget: 15000, used: 14100 },
+                    { sku: 'UNI-203', name: 'Corporate Dress Shirts - Blue (L)', qty: 20, price: 22.50, costCenter: 'Uniform-Shirts', budget: 15000, used: 14100 },
+                    { sku: 'UNI-205', name: 'Corporate Polo Shirts - Navy (XL)', qty: 15, price: 18.00, costCenter: 'Uniform-Shirts', budget: 15000, used: 14100 }
+                  ],
+                  requiresPO: true,
+                  approvalTier: 1,
+                  history: [
+                    { action: 'Created', by: 'Jennifer Clarke', date: '2025-01-05 16:45' }
+                  ]
+                },
+                {
+                  id: 'ORD-2025-0337',
+                  customer: 'Adidas UK',
+                  userId: 'AD-024',
+                  userName: 'Thomas Anderson',
+                  userEmail: 'thomas.anderson@adidas.co.uk',
+                  date: '2025-01-05',
+                  time: '14:12',
+                  total: 890.00,
+                  currency: 'GBP',
+                  reason: 'Exceeds Single Order Limit',
+                  details: 'Order over £500 threshold',
+                  urgency: 'low',
+                  items: [
+                    { sku: 'OFF-332', name: 'Executive Office Chairs', qty: 4, price: 189.50, costCenter: 'Office Furniture', budget: 25000, used: 12400 },
+                    { sku: 'OFF-119', name: 'Standing Desk Converter', qty: 2, price: 155.50, costCenter: 'Office Furniture', budget: 25000, used: 12400 }
+                  ],
+                  requiresPO: false,
+                  approvalTier: 1,
+                  history: [
+                    { action: 'Created', by: 'Thomas Anderson', date: '2025-01-05 14:12' }
+                  ]
+                }
+              ],
+
+              recentActivity: [
+                { id: 'ORD-2025-0340', customer: 'Hugo Boss', userName: 'David Chen', total: 445.20, action: 'Approved', by: 'You', date: '2025-01-06 13:22', costCenter: 'Stationery' },
+                { id: 'ORD-2025-0339', customer: 'Adidas UK', userName: 'Emma Wilson', total: 1820.00, action: 'Approved', by: 'You', date: '2025-01-06 12:15', costCenter: 'IT Equipment' },
+                { id: 'ORD-2025-0336', customer: 'Hugo Boss', userName: 'Lisa Chang', total: 320.50, action: 'Rejected', by: 'You', date: '2025-01-06 11:45', costCenter: 'Marketing Materials', reason: 'Duplicate order' },
+                { id: 'ORD-2025-0335', customer: 'Nike Europe', userName: 'Robert Foster', total: 2100.00, action: 'Approved', by: 'You', date: '2025-01-06 10:30', costCenter: 'Safety Equipment' },
+                { id: 'ORD-2025-0334', customer: 'Hugo Boss', userName: 'Sarah Mitchell', total: 678.90, action: 'Approved', by: 'You', date: '2025-01-06 09:12', costCenter: 'Janitorial Supplies' },
+                { id: 'ORD-2025-0333', customer: 'Adidas UK', userName: 'Mark Stevens', total: 1455.00, action: 'Delegated', by: 'You', date: '2025-01-05 17:30', costCenter: 'Uniform-Jackets', delegatedTo: 'Finance Director' },
+                { id: 'ORD-2025-0332', customer: 'Nike Europe', userName: 'Anna Schmidt', total: 890.40, action: 'Approved', by: 'You', date: '2025-01-05 16:20', costCenter: 'Office Supplies' }
+              ],
+
+              get pendingOrders() {
+                let filtered = this.allOrders.filter(order => {
+                  // Customer filter
+                  if (this.filterCustomer !== 'all' && order.customer !== this.filterCustomer) return false;
+
+                  // Urgency filter
+                  if (this.filterUrgency !== 'all' && order.urgency !== this.filterUrgency) return false;
+
+                  // Tier filter
+                  if (this.filterTier !== 'all' && order.approvalTier.toString() !== this.filterTier) return false;
+
+                  // Search query
+                  if (this.searchQuery && !order.id.toLowerCase().includes(this.searchQuery.toLowerCase()) &&
+                      !order.userName.toLowerCase().includes(this.searchQuery.toLowerCase())) return false;
+
+                  return true;
+                });
+
+                // Sorting
+                if (this.sortBy === 'date-desc') {
+                  filtered.sort((a, b) => new Date(b.date + ' ' + b.time) - new Date(a.date + ' ' + a.time));
+                } else if (this.sortBy === 'date-asc') {
+                  filtered.sort((a, b) => new Date(a.date + ' ' + a.time) - new Date(b.date + ' ' + b.time));
+                } else if (this.sortBy === 'value-desc') {
+                  filtered.sort((a, b) => b.total - a.total);
+                } else if (this.sortBy === 'value-asc') {
+                  filtered.sort((a, b) => a.total - b.total);
+                } else if (this.sortBy === 'urgency') {
+                  const urgencyOrder = { 'high': 0, 'medium': 1, 'low': 2 };
+                  filtered.sort((a, b) => urgencyOrder[a.urgency] - urgencyOrder[b.urgency]);
+                }
+
+                return filtered;
+              },
+
+              get uniqueCustomers() {
+                return [...new Set(this.allOrders.map(o => o.customer))];
+              },
+
+              get totalPendingValue() {
+                return this.pendingOrders.reduce((sum, order) => sum + order.total, 0);
+              },
+
+              get highPriorityCount() {
+                return this.pendingOrders.filter(o => o.urgency === 'high').length;
+              },
+
+              toggleOrderSelection(orderId) {
+                const index = this.selectedOrders.indexOf(orderId);
+                if (index > -1) {
+                  this.selectedOrders.splice(index, 1);
+                } else {
+                  this.selectedOrders.push(orderId);
+                }
+              },
+
+              toggleSelectAll() {
+                if (this.selectedOrders.length === this.pendingOrders.length) {
+                  this.selectedOrders = [];
+                } else {
+                  this.selectedOrders = this.pendingOrders.map(o => o.id);
+                }
+              },
+
+              get allSelected() {
+                return this.pendingOrders.length > 0 && this.selectedOrders.length === this.pendingOrders.length;
+              },
+
+              openBulkApprove() {
+                if (this.selectedOrders.length > 0) {
+                  this.bulkApproveModal = true;
+                }
+              },
+
+              processBulkApprove() {
+                this.approving = true;
+                setTimeout(() => {
+                  this.approving = false;
+                  this.bulkApproveModal = false;
+
+                  // Remove approved orders
+                  this.allOrders = this.allOrders.filter(o => !this.selectedOrders.includes(o.id));
+                  this.selectedOrders = [];
+
+                  this.actionType = 'approved';
+                  this.successModal = true;
+                  setTimeout(() => {
+                    this.successModal = false;
+                  }, 3000);
+                }, 1500);
+              },
+
+              calculateBudgetImpact(order) {
+                const costCenters = {};
+                order.items.forEach(item => {
+                  if (!costCenters[item.costCenter]) {
+                    costCenters[item.costCenter] = {
+                      name: item.costCenter,
+                      budget: item.budget,
+                      used: item.used,
+                      additional: 0
+                    };
+                  }
+                  costCenters[item.costCenter].additional += item.qty * item.price;
+                });
+                return Object.values(costCenters);
+              },
+
+              openReview(order) {
+                this.selectedOrder = order;
+                this.approvalNotes = '';
+                this.reviewModal = true;
+              },
+
+              closeReview() {
+                this.reviewModal = false;
+                setTimeout(() => {
+                  this.selectedOrder = null;
+                  this.approvalNotes = '';
+                }, 300);
+              },
+
+              openDelegate() {
+                this.reviewModal = false;
+                setTimeout(() => {
+                  this.delegateModal = true;
+                }, 300);
+              },
+
+              processDelegate() {
+                this.delegating = true;
+                setTimeout(() => {
+                  this.delegating = false;
+                  this.delegateModal = false;
+
+                  const index = this.allOrders.findIndex(o => o.id === this.selectedOrder.id);
+                  if (index > -1) {
+                    this.allOrders.splice(index, 1);
+                  }
+
+                  this.actionType = 'delegated';
+                  this.successModal = true;
+                  setTimeout(() => {
+                    this.successModal = false;
+                    this.selectedOrder = null;
+                    this.delegateTo = '';
+                  }, 3000);
+                }, 1500);
+              },
+
+              initiateApprove() {
+                if (this.selectedOrder.requiresPO) {
+                  this.reviewModal = false;
+                  setTimeout(() => {
+                    this.poNumberModal = true;
+                  }, 300);
+                } else {
+                  this.approveOrder();
+                }
+              },
+
+              approveOrder() {
+                this.approving = true;
+                this.actionType = 'approved';
+
+                setTimeout(() => {
+                  this.approving = false;
+                  this.reviewModal = false;
+                  this.poNumberModal = false;
+
+                  const index = this.allOrders.findIndex(o => o.id === this.selectedOrder.id);
+                  if (index > -1) {
+                    this.allOrders.splice(index, 1);
+                  }
+
+                  setTimeout(() => {
+                    this.successModal = true;
+                    setTimeout(() => {
+                      this.successModal = false;
+                      this.selectedOrder = null;
+                      this.poNumber = '';
+                      this.approvalNotes = '';
+                    }, 3000);
+                  }, 300);
+                }, 1500);
+              },
+
+              rejectOrder() {
+                this.rejecting = true;
+                this.actionType = 'rejected';
+
+                setTimeout(() => {
+                  this.rejecting = false;
+                  this.reviewModal = false;
+
+                  const index = this.allOrders.findIndex(o => o.id === this.selectedOrder.id);
+                  if (index > -1) {
+                    this.allOrders.splice(index, 1);
+                  }
+
+                  setTimeout(() => {
+                    this.successModal = true;
+                    setTimeout(() => {
+                      this.successModal = false;
+                      this.selectedOrder = null;
+                      this.rejectionReason = '';
+                    }, 3000);
+                  }, 300);
+                }, 1500);
+              },
+
+              clearFilters() {
+                this.filterCustomer = 'all';
+                this.filterUrgency = 'all';
+                this.filterTier = 'all';
+                this.searchQuery = '';
+                this.sortBy = 'date-desc';
+              },
+
+              getUrgencyColor(urgency) {
+                if (urgency === 'high') return 'text-red-500 dark:text-red-400';
+                if (urgency === 'medium') return 'text-amber-500 dark:text-amber-400';
+                return 'text-gray-500 dark:text-gray-400';
+              },
+
+              getUrgencyBg(urgency) {
+                if (urgency === 'high') return 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800';
+                if (urgency === 'medium') return 'bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800';
+                return 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700';
+              },
+
+              getActionBadge(action) {
+                if (action === 'Approved') return 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400';
+                if (action === 'Rejected') return 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400';
+                if (action === 'Delegated') return 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400';
+                return 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-400';
+              }
+            }"
+          >
+            <!-- Breadcrumb -->
+            <div class="mb-6">
+              <h1 class="text-3xl font-bold text-gray-900 dark:text-white">
+                Approver Dashboard
+              </h1>
+              <p class="mt-2 text-gray-600 dark:text-gray-400">
+                Review and manage pending order approvals
+              </p>
+            </div>
+
+            <!-- Tabs -->
+            <div class="mb-6 border-b border-gray-200 dark:border-gray-700">
+              <nav class="flex gap-4">
+                <button
+                  @click="activeTab = 'pending'"
+                  :class="activeTab === 'pending' ? 'border-blue-600 text-blue-600 dark:border-blue-400 dark:text-blue-400' : 'border-transparent text-gray-600 hover:text-gray-900 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'"
+                  class="border-b-2 px-4 py-2 text-sm font-medium transition-colors"
+                >
+                  Pending (<span x-text="pendingOrders.length">3</span>)
+                </button>
+                <button
+                  @click="activeTab = 'recent'"
+                  :class="activeTab === 'recent' ? 'border-blue-600 text-blue-600 dark:border-blue-400 dark:text-blue-400' : 'border-transparent text-gray-600 hover:text-gray-900 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'"
+                  class="border-b-2 px-4 py-2 text-sm font-medium transition-colors"
+                >
+                  Recent Activity
+                </button>
+              </nav>
+            </div>
+
+            <!-- Pending Tab Content -->
+            <div x-show="activeTab === 'pending'">
+              <!-- Stats Cards -->
+              <div class="mb-6 grid grid-cols-1 gap-4 md:grid-cols-4">
+                <div
+                  class="rounded-lg border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800"
+                >
+                  <div class="flex items-center justify-between">
+                    <div>
+                      <p
+                        class="text-sm font-medium text-gray-600 dark:text-gray-400"
+                      >
+                        Pending Approvals
+                      </p>
+                      <p
+                        class="mt-2 text-3xl font-bold text-gray-900 dark:text-white"
+                        x-text="pendingOrders.length"
+                      >
+                        3
+                      </p>
+                    </div>
+                    <div class="rounded-lg bg-blue-50 p-3 dark:bg-blue-900/20">
+                      <svg
+                        class="h-8 w-8 text-blue-600 dark:text-blue-400"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"
+                        ></path>
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+
+                <div
+                  class="rounded-lg border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800"
+                >
+                  <div class="flex items-center justify-between">
+                    <div>
+                      <p
+                        class="text-sm font-medium text-gray-600 dark:text-gray-400"
+                      >
+                        Total Value
+                      </p>
+                      <p
+                        class="mt-2 text-3xl font-bold text-gray-900 dark:text-white"
+                        x-text="'£' + totalPendingValue.toFixed(2)"
+                      >
+                        £4,732.80
+                      </p>
+                    </div>
+                    <div
+                      class="rounded-lg bg-green-50 p-3 dark:bg-green-900/20"
+                    >
+                      <svg
+                        class="h-8 w-8 text-green-600 dark:text-green-400"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                        ></path>
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+
+                <div
+                  class="rounded-lg border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800"
+                >
+                  <div class="flex items-center justify-between">
+                    <div>
+                      <p
+                        class="text-sm font-medium text-gray-600 dark:text-gray-400"
+                      >
+                        High Priority
+                      </p>
+                      <p
+                        class="mt-2 text-3xl font-bold text-red-600 dark:text-red-400"
+                        x-text="highPriorityCount"
+                      >
+                        1
+                      </p>
+                    </div>
+                    <div class="rounded-lg bg-red-50 p-3 dark:bg-red-900/20">
+                      <svg
+                        class="h-8 w-8 text-red-600 dark:text-red-400"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                        ></path>
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+
+                <div
+                  class="rounded-lg border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800"
+                >
+                  <div class="flex items-center justify-between">
+                    <div>
+                      <p
+                        class="text-sm font-medium text-gray-600 dark:text-gray-400"
+                      >
+                        Approved Today
+                      </p>
+                      <p
+                        class="mt-2 text-3xl font-bold text-gray-900 dark:text-white"
+                      >
+                        7
+                      </p>
+                    </div>
+                    <div
+                      class="rounded-lg bg-purple-50 p-3 dark:bg-purple-900/20"
+                    >
+                      <svg
+                        class="h-8 w-8 text-purple-600 dark:text-purple-400"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                        ></path>
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Filters & Actions Bar -->
+              <div
+                class="mb-6 rounded-lg border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800"
+              >
+                <div
+                  class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between"
+                >
+                  <!-- Filters -->
+                  <div class="flex flex-col gap-3 lg:flex-row lg:items-center">
+                    <!-- Search -->
+                    <div class="relative">
+                      <input
+                        type="text"
+                        x-model="searchQuery"
+                        placeholder="Search by Order ID or User..."
+                        class="w-full rounded-lg border border-gray-300 px-4 py-2 pl-10 text-sm focus:border-transparent focus:ring-2 focus:ring-blue-500 lg:w-64 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                      />
+                      <svg
+                        class="absolute top-2.5 left-3 h-5 w-5 text-gray-400"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                        ></path>
+                      </svg>
+                    </div>
+
+                    <!-- Customer Filter -->
+                    <select
+                      x-model="filterCustomer"
+                      class="rounded-lg border border-gray-300 px-4 py-2 text-sm focus:border-transparent focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                    >
+                      <option value="all">All Customers</option>
+                      <template
+                        x-for="customer in uniqueCustomers"
+                        :key="customer"
+                      >
+                        <option :value="customer" x-text="customer"></option>
+                      </template>
+                    </select>
+
+                    <!-- Urgency Filter -->
+                    <select
+                      x-model="filterUrgency"
+                      class="rounded-lg border border-gray-300 px-4 py-2 text-sm focus:border-transparent focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                    >
+                      <option value="all">All Urgency</option>
+                      <option value="high">High</option>
+                      <option value="medium">Medium</option>
+                      <option value="low">Low</option>
+                    </select>
+
+                    <!-- Tier Filter -->
+                    <select
+                      x-model="filterTier"
+                      class="rounded-lg border border-gray-300 px-4 py-2 text-sm focus:border-transparent focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                    >
+                      <option value="all">All Tiers</option>
+                      <option value="1">Tier 1</option>
+                      <option value="2">Tier 2</option>
+                    </select>
+
+                    <!-- Sort -->
+                    <select
+                      x-model="sortBy"
+                      class="rounded-lg border border-gray-300 px-4 py-2 text-sm focus:border-transparent focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                    >
+                      <option value="date-desc">Newest First</option>
+                      <option value="date-asc">Oldest First</option>
+                      <option value="value-desc">Highest Value</option>
+                      <option value="value-asc">Lowest Value</option>
+                      <option value="urgency">Urgency</option>
+                    </select>
+
+                    <button
+                      @click="clearFilters()"
+                      class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+                    >
+                      Clear Filters
+                    </button>
+                  </div>
+
+                  <!-- Bulk Actions -->
+                  <div class="flex items-center gap-3">
+                    <span
+                      class="text-sm text-gray-600 dark:text-gray-400"
+                      x-show="selectedOrders.length > 0"
+                    >
+                      <span x-text="selectedOrders.length"></span> selected
+                    </span>
+                    <button
+                      @click="openBulkApprove()"
+                      :disabled="selectedOrders.length === 0"
+                      class="rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-green-500 dark:hover:bg-green-600"
+                    >
+                      <span class="flex items-center gap-2">
+                        <svg
+                          class="h-4 w-4"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M5 13l4 4L19 7"
+                          ></path>
+                        </svg>
+                        Bulk Approve
+                      </span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Pending Orders List -->
+              <div
+                class="rounded-lg border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800"
+              >
+                <div class="border-b border-gray-200 p-6 dark:border-gray-700">
+                  <div class="flex items-center justify-between">
+                    <h2 class="text-xl font-bold text-gray-900 dark:text-white">
+                      Pending Approvals
+                    </h2>
+                    <label
+                      class="flex cursor-pointer items-center gap-2"
+                      x-show="pendingOrders.length > 0"
+                    >
+                      <input
+                        type="checkbox"
+                        :checked="allSelected"
+                        @change="toggleSelectAll()"
+                        class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700"
+                      />
+                      <span class="text-sm text-gray-600 dark:text-gray-400"
+                        >Select All</span
+                      >
+                    </label>
+                  </div>
+                </div>
+
+                <div class="space-y-4 p-6">
+                  <template x-if="pendingOrders.length === 0">
+                    <div class="py-12 text-center">
+                      <svg
+                        class="mx-auto h-16 w-16 text-gray-400 dark:text-gray-600"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                        ></path>
+                      </svg>
+                      <h3
+                        class="mt-4 text-lg font-medium text-gray-900 dark:text-white"
+                      >
+                        No pending approvals
+                      </h3>
+                      <p class="mt-2 text-gray-600 dark:text-gray-400">
+                        All orders have been processed or no orders match your
+                        filters
+                      </p>
+                      <button
+                        @click="clearFilters()"
+                        class="mt-4 rounded-lg bg-blue-50 px-4 py-2 text-sm font-medium text-blue-600 hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-400 dark:hover:bg-blue-900/30"
+                      >
+                        Clear Filters
+                      </button>
+                    </div>
+                  </template>
+
+                  <template x-for="order in pendingOrders" :key="order.id">
+                    <div
+                      class="rounded-lg border p-4 transition-all hover:shadow-md"
+                      :class="getUrgencyBg(order.urgency)"
+                    >
+                      <div class="flex items-start gap-4">
+                        <!-- Checkbox -->
+                        <div class="flex items-center pt-2">
+                          <input
+                            type="checkbox"
+                            :checked="selectedOrders.includes(order.id)"
+                            @change="toggleOrderSelection(order.id)"
+                            class="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700"
+                            @click.stop
+                          />
+                        </div>
+
+                        <!-- Order Details -->
+                        <div
+                          class="flex-1 cursor-pointer"
+                          @click="openReview(order)"
+                        >
+                          <div class="mb-2 flex items-center gap-3">
+                            <h3
+                              class="text-lg font-bold text-gray-900 dark:text-white"
+                              x-text="order.id"
+                            ></h3>
+                            <span
+                              class="rounded-full px-2 py-1 text-xs font-medium"
+                              :class="order.urgency === 'high' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' : order.urgency === 'medium' ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' : 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-400'"
+                              x-text="order.urgency.toUpperCase()"
+                            >
+                            </span>
+                            <template x-if="order.requiresPO">
+                              <span
+                                class="rounded-full bg-blue-100 px-2 py-1 text-xs font-medium text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"
+                              >
+                                PO REQUIRED
+                              </span>
+                            </template>
+                            <span
+                              class="rounded-full bg-purple-100 px-2 py-1 text-xs font-medium text-purple-700 dark:bg-purple-900/30 dark:text-purple-400"
+                              x-text="'Tier ' + order.approvalTier"
+                            >
+                            </span>
+                          </div>
+
+                          <div
+                            class="mb-3 grid grid-cols-2 gap-4 md:grid-cols-4"
+                          >
+                            <div>
+                              <p
+                                class="text-xs text-gray-600 dark:text-gray-400"
+                              >
+                                Customer
+                              </p>
+                              <p
+                                class="font-medium text-gray-900 dark:text-white"
+                                x-text="order.customer"
+                              ></p>
+                            </div>
+                            <div>
+                              <p
+                                class="text-xs text-gray-600 dark:text-gray-400"
+                              >
+                                User
+                              </p>
+                              <p
+                                class="font-medium text-gray-900 dark:text-white"
+                                x-text="order.userName"
+                              ></p>
+                            </div>
+                            <div>
+                              <p
+                                class="text-xs text-gray-600 dark:text-gray-400"
+                              >
+                                Date & Time
+                              </p>
+                              <p
+                                class="font-medium text-gray-900 dark:text-white"
+                                x-text="order.date + ' ' + order.time"
+                              ></p>
+                            </div>
+                            <div>
+                              <p
+                                class="text-xs text-gray-600 dark:text-gray-400"
+                              >
+                                Order Value
+                              </p>
+                              <p
+                                class="text-lg font-bold text-gray-900 dark:text-white"
+                                x-text="'£' + order.total.toFixed(2)"
+                              ></p>
+                            </div>
+                          </div>
+
+                          <div
+                            class="rounded-lg border bg-white p-3 dark:border-gray-600 dark:bg-gray-900"
+                          >
+                            <p
+                              class="text-sm font-medium text-gray-900 dark:text-white"
+                            >
+                              <span
+                                class="font-bold"
+                                :class="getUrgencyColor(order.urgency)"
+                                >⚠
+                              </span>
+                              <span x-text="order.reason"></span>
+                            </p>
+                            <p
+                              class="mt-1 text-xs text-gray-600 dark:text-gray-400"
+                              x-text="order.details"
+                            ></p>
+                          </div>
+                        </div>
+
+                        <!-- Quick Actions -->
+                        <div class="flex flex-col gap-2">
+                          <button
+                            @click="openReview(order)"
+                            class="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600"
+                          >
+                            Review
+                            <svg
+                              class="h-4 w-4"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M9 5l7 7-7 7"
+                              ></path>
+                            </svg>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </template>
+                </div>
+              </div>
+            </div>
+
+            <!-- Recent Activity Tab -->
+            <div x-show="activeTab === 'recent'">
+              <div
+                class="rounded-lg border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800"
+              >
+                <div class="border-b border-gray-200 p-6 dark:border-gray-700">
+                  <h2 class="text-xl font-bold text-gray-900 dark:text-white">
+                    Recent Activity
+                  </h2>
+                  <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
+                    Your last 10 approval actions
+                  </p>
+                </div>
+
+                <div class="p-6">
+                  <div class="space-y-4">
+                    <template
+                      x-for="activity in recentActivity"
+                      :key="activity.id"
+                    >
+                      <div
+                        class="rounded-lg border border-gray-200 p-4 dark:border-gray-700"
+                      >
+                        <div class="flex items-start justify-between">
+                          <div class="flex-1">
+                            <div class="mb-2 flex items-center gap-3">
+                              <h3
+                                class="text-lg font-bold text-gray-900 dark:text-white"
+                                x-text="activity.id"
+                              ></h3>
+                              <span
+                                class="rounded-full px-2 py-1 text-xs font-medium"
+                                :class="getActionBadge(activity.action)"
+                                x-text="activity.action.toUpperCase()"
+                              >
+                              </span>
+                            </div>
+                            <div
+                              class="mb-2 grid grid-cols-2 gap-4 md:grid-cols-4"
+                            >
+                              <div>
+                                <p
+                                  class="text-xs text-gray-600 dark:text-gray-400"
+                                >
+                                  Customer
+                                </p>
+                                <p
+                                  class="font-medium text-gray-900 dark:text-white"
+                                  x-text="activity.customer"
+                                ></p>
+                              </div>
+                              <div>
+                                <p
+                                  class="text-xs text-gray-600 dark:text-gray-400"
+                                >
+                                  User
+                                </p>
+                                <p
+                                  class="font-medium text-gray-900 dark:text-white"
+                                  x-text="activity.userName"
+                                ></p>
+                              </div>
+                              <div>
+                                <p
+                                  class="text-xs text-gray-600 dark:text-gray-400"
+                                >
+                                  Cost Center
+                                </p>
+                                <p
+                                  class="font-medium text-gray-900 dark:text-white"
+                                  x-text="activity.costCenter"
+                                ></p>
+                              </div>
+                              <div>
+                                <p
+                                  class="text-xs text-gray-600 dark:text-gray-400"
+                                >
+                                  Value
+                                </p>
+                                <p
+                                  class="font-bold text-gray-900 dark:text-white"
+                                  x-text="'£' + activity.total.toFixed(2)"
+                                ></p>
+                              </div>
+                            </div>
+                            <div
+                              class="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400"
+                            >
+                              <span
+                                x-text="activity.action + ' by ' + activity.by"
+                              ></span>
+                              <span>•</span>
+                              <span x-text="activity.date"></span>
+                              <template x-if="activity.reason">
+                                <span>
+                                  <span>•</span>
+                                  <span x-text="activity.reason"></span>
+                                </span>
+                              </template>
+                              <template x-if="activity.delegatedTo">
+                                <span>
+                                  <span>•</span>
+                                  <span
+                                    x-text="'to ' + activity.delegatedTo"
+                                  ></span>
+                                </span>
+                              </template>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </template>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Review Modal -->
+            <template x-if="reviewModal && selectedOrder">
+              <div
+                class="bg-opacity-50 fixed inset-0 z-[99999] flex items-center justify-center bg-black p-4"
+                @click.self="closeReview()"
+              >
+                <div
+                  class="max-h-[90vh] w-full max-w-5xl overflow-y-auto rounded-lg bg-white shadow-xl dark:bg-gray-800"
+                  @click.stop
+                >
+                  <div>
+                    <!-- Modal Header -->
+                    <div
+                      class="sticky top-0 z-10 flex items-center justify-between border-b border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800"
+                    >
+                      <div>
+                        <h3
+                          class="text-2xl font-bold text-gray-900 dark:text-white"
+                          x-text="'Order ' + selectedOrder.id"
+                        ></h3>
+                        <p
+                          class="mt-1 text-sm text-gray-600 dark:text-gray-400"
+                        >
+                          Review order details and approve or reject
+                        </p>
+                      </div>
+                      <button
+                        @click="closeReview()"
+                        class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                      >
+                        <svg
+                          class="h-6 w-6"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M6 18L18 6M6 6l12 12"
+                          ></path>
+                        </svg>
+                      </button>
+                    </div>
+
+                    <!-- Modal Body -->
+                    <div class="space-y-6 p-6">
+                      <!-- Order Info -->
+                      <div
+                        class="grid grid-cols-2 gap-4 rounded-lg border border-gray-200 p-4 md:grid-cols-4 dark:border-gray-700"
+                      >
+                        <div>
+                          <p
+                            class="text-xs font-medium text-gray-600 dark:text-gray-400"
+                          >
+                            Customer
+                          </p>
+                          <p
+                            class="mt-1 text-sm font-bold text-gray-900 dark:text-white"
+                            x-text="selectedOrder.customer"
+                          ></p>
+                        </div>
+                        <div>
+                          <p
+                            class="text-xs font-medium text-gray-600 dark:text-gray-400"
+                          >
+                            Ordered By
+                          </p>
+                          <p
+                            class="mt-1 text-sm font-bold text-gray-900 dark:text-white"
+                            x-text="selectedOrder.userName"
+                          ></p>
+                          <p
+                            class="text-xs text-gray-600 dark:text-gray-400"
+                            x-text="selectedOrder.userEmail"
+                          ></p>
+                        </div>
+                        <div>
+                          <p
+                            class="text-xs font-medium text-gray-600 dark:text-gray-400"
+                          >
+                            Date & Time
+                          </p>
+                          <p
+                            class="mt-1 text-sm font-bold text-gray-900 dark:text-white"
+                            x-text="selectedOrder.date + ' ' + selectedOrder.time"
+                          ></p>
+                        </div>
+                        <div>
+                          <p
+                            class="text-xs font-medium text-gray-600 dark:text-gray-400"
+                          >
+                            Total Value
+                          </p>
+                          <p
+                            class="mt-1 text-2xl font-bold text-gray-900 dark:text-white"
+                            x-text="'£' + selectedOrder.total.toFixed(2)"
+                          ></p>
+                        </div>
+                      </div>
+
+                      <!-- Approval Reason Alert -->
+                      <div
+                        class="rounded-lg border-l-4 p-4"
+                        :class="getUrgencyBg(selectedOrder.urgency)"
+                      >
+                        <div class="flex items-start">
+                          <svg
+                            class="mt-0.5 h-6 w-6"
+                            :class="getUrgencyColor(selectedOrder.urgency)"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              stroke-width="2"
+                              d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                            ></path>
+                          </svg>
+                          <div class="ml-3">
+                            <p
+                              class="font-bold text-gray-900 dark:text-white"
+                              x-text="selectedOrder.reason"
+                            ></p>
+                            <p
+                              class="mt-1 text-sm text-gray-700 dark:text-gray-300"
+                              x-text="selectedOrder.details"
+                            ></p>
+                          </div>
+                        </div>
+                      </div>
+
+                      <!-- Budget Impact Preview -->
+                      <div
+                        class="rounded-lg border border-blue-200 bg-blue-50 p-4 dark:border-blue-800 dark:bg-blue-900/20"
+                      >
+                        <h4
+                          class="mb-3 flex items-center gap-2 text-lg font-bold text-gray-900 dark:text-white"
+                        >
+                          <svg
+                            class="h-5 w-5 text-blue-600 dark:text-blue-400"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              stroke-width="2"
+                              d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"
+                            ></path>
+                          </svg>
+                          Budget Impact Preview
+                        </h4>
+                        <template
+                          x-for="cc in calculateBudgetImpact(selectedOrder)"
+                          :key="cc.name"
+                        >
+                          <div class="mb-3">
+                            <div class="mb-1 flex items-center justify-between">
+                              <span
+                                class="text-sm font-medium text-gray-900 dark:text-white"
+                                x-text="cc.name"
+                              ></span>
+                              <span
+                                class="text-sm font-bold text-gray-900 dark:text-white"
+                              >
+                                <span
+                                  x-text="'£' + (cc.used + cc.additional).toFixed(0)"
+                                ></span>
+                                /
+                                <span
+                                  x-text="'£' + cc.budget.toFixed(0)"
+                                ></span>
+                                (<span
+                                  x-text="Math.round((cc.used + cc.additional) / cc.budget * 100)"
+                                ></span
+                                >%)
+                              </span>
+                            </div>
+                            <div
+                              class="h-2 w-full rounded-full bg-gray-200 dark:bg-gray-700"
+                            >
+                              <div
+                                class="h-2 rounded-full transition-all"
+                                :class="(cc.used + cc.additional) / cc.budget > 0.95 ? 'bg-red-600' : (cc.used + cc.additional) / cc.budget > 0.85 ? 'bg-amber-600' : 'bg-green-600'"
+                                :style="'width: ' + Math.min(((cc.used + cc.additional) / cc.budget * 100), 100) + '%'"
+                              ></div>
+                            </div>
+                            <div
+                              class="mt-1 flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400"
+                            >
+                              <span
+                                >Current: £<span
+                                  x-text="cc.used.toFixed(0)"
+                                ></span
+                              ></span>
+                              <span>+</span>
+                              <span
+                                class="font-bold text-blue-600 dark:text-blue-400"
+                                >This Order: £<span
+                                  x-text="cc.additional.toFixed(2)"
+                                ></span
+                              ></span>
+                            </div>
+                          </div>
+                        </template>
+                      </div>
+
+                      <!-- Order Items -->
+                      <div>
+                        <h4
+                          class="mb-3 text-lg font-bold text-gray-900 dark:text-white"
+                        >
+                          Order Items
+                        </h4>
+                        <div
+                          class="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700"
+                        >
+                          <table
+                            class="min-w-full divide-y divide-gray-200 dark:divide-gray-700"
+                          >
+                            <thead class="bg-gray-50 dark:bg-gray-900">
+                              <tr>
+                                <th
+                                  class="px-4 py-3 text-left text-xs font-medium tracking-wider text-gray-700 uppercase dark:text-gray-300"
+                                >
+                                  SKU
+                                </th>
+                                <th
+                                  class="px-4 py-3 text-left text-xs font-medium tracking-wider text-gray-700 uppercase dark:text-gray-300"
+                                >
+                                  Product
+                                </th>
+                                <th
+                                  class="px-4 py-3 text-center text-xs font-medium tracking-wider text-gray-700 uppercase dark:text-gray-300"
+                                >
+                                  Qty
+                                </th>
+                                <th
+                                  class="px-4 py-3 text-right text-xs font-medium tracking-wider text-gray-700 uppercase dark:text-gray-300"
+                                >
+                                  Price
+                                </th>
+                                <th
+                                  class="px-4 py-3 text-right text-xs font-medium tracking-wider text-gray-700 uppercase dark:text-gray-300"
+                                >
+                                  Total
+                                </th>
+                                <th
+                                  class="px-4 py-3 text-left text-xs font-medium tracking-wider text-gray-700 uppercase dark:text-gray-300"
+                                >
+                                  Cost Center
+                                </th>
+                              </tr>
+                            </thead>
+                            <tbody
+                              class="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-800"
+                            >
+                              <template
+                                x-for="item in selectedOrder.items"
+                                :key="item.sku"
+                              >
+                                <tr>
+                                  <td
+                                    class="px-4 py-3 text-sm font-medium text-gray-900 dark:text-white"
+                                    x-text="item.sku"
+                                  ></td>
+                                  <td
+                                    class="px-4 py-3 text-sm text-gray-900 dark:text-white"
+                                    x-text="item.name"
+                                  ></td>
+                                  <td
+                                    class="px-4 py-3 text-center text-sm text-gray-900 dark:text-white"
+                                    x-text="item.qty"
+                                  ></td>
+                                  <td
+                                    class="px-4 py-3 text-right text-sm text-gray-900 dark:text-white"
+                                    x-text="'£' + item.price.toFixed(2)"
+                                  ></td>
+                                  <td
+                                    class="px-4 py-3 text-right text-sm font-medium text-gray-900 dark:text-white"
+                                    x-text="'£' + (item.qty * item.price).toFixed(2)"
+                                  ></td>
+                                  <td
+                                    class="px-4 py-3 text-sm text-gray-900 dark:text-white"
+                                  >
+                                    <div>
+                                      <p
+                                        class="font-medium"
+                                        x-text="item.costCenter"
+                                      ></p>
+                                      <p
+                                        class="text-xs text-gray-600 dark:text-gray-400"
+                                      >
+                                        <span
+                                          x-text="'£' + item.used.toFixed(0)"
+                                        ></span>
+                                        /
+                                        <span
+                                          x-text="'£' + item.budget.toFixed(0)"
+                                        ></span>
+                                      </p>
+                                    </div>
+                                  </td>
+                                </tr>
+                              </template>
+                            </tbody>
+                            <tfoot class="bg-gray-50 dark:bg-gray-900">
+                              <tr>
+                                <td
+                                  colspan="4"
+                                  class="px-4 py-3 text-right text-sm font-bold text-gray-900 dark:text-white"
+                                >
+                                  Order Total:
+                                </td>
+                                <td
+                                  class="px-4 py-3 text-right text-lg font-bold text-gray-900 dark:text-white"
+                                  x-text="'£' + selectedOrder.total.toFixed(2)"
+                                ></td>
+                                <td></td>
+                              </tr>
+                            </tfoot>
+                          </table>
+                        </div>
+                      </div>
+
+                      <!-- Approval History -->
+                      <div>
+                        <h4
+                          class="mb-3 text-lg font-bold text-gray-900 dark:text-white"
+                        >
+                          Approval History
+                        </h4>
+                        <div class="space-y-2">
+                          <template
+                            x-for="entry in selectedOrder.history"
+                            :key="entry.date"
+                          >
+                            <div
+                              class="flex items-start gap-3 rounded-lg border border-gray-200 p-3 dark:border-gray-700"
+                            >
+                              <svg
+                                class="mt-0.5 h-5 w-5 text-blue-600 dark:text-blue-400"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  stroke-linecap="round"
+                                  stroke-linejoin="round"
+                                  stroke-width="2"
+                                  d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                                ></path>
+                              </svg>
+                              <div class="flex-1">
+                                <p
+                                  class="text-sm font-medium text-gray-900 dark:text-white"
+                                  x-text="entry.action"
+                                ></p>
+                                <p
+                                  class="text-xs text-gray-600 dark:text-gray-400"
+                                >
+                                  <span x-text="entry.by"></span> •
+                                  <span x-text="entry.date"></span>
+                                </p>
+                                <template x-if="entry.note">
+                                  <p
+                                    class="mt-1 text-xs text-gray-600 italic dark:text-gray-400"
+                                    x-text="entry.note"
+                                  ></p>
+                                </template>
+                              </div>
+                            </div>
+                          </template>
+                        </div>
+                      </div>
+
+                      <!-- Approval Notes -->
+                      <div>
+                        <label
+                          class="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+                        >
+                          Add Notes (Optional)
+                        </label>
+                        <textarea
+                          x-model="approvalNotes"
+                          rows="3"
+                          class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-transparent focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                          placeholder="Add internal notes about this approval (e.g., 'Approved due to urgent stock requirements')"
+                        ></textarea>
+                      </div>
+
+                      <!-- Email Notification Toggle -->
+                      <div
+                        class="flex items-center gap-3 rounded-lg border border-gray-200 p-4 dark:border-gray-700"
+                      >
+                        <input
+                          type="checkbox"
+                          x-model="sendNotification"
+                          id="sendNotification"
+                          class="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700"
+                        />
+                        <label
+                          for="sendNotification"
+                          class="flex-1 cursor-pointer"
+                        >
+                          <p
+                            class="text-sm font-medium text-gray-900 dark:text-white"
+                          >
+                            Send Email Notification
+                          </p>
+                          <p class="text-xs text-gray-600 dark:text-gray-400">
+                            Notify the user of your approval decision
+                          </p>
+                        </label>
+                      </div>
+                    </div>
+
+                    <!-- Modal Footer -->
+                    <div
+                      class="sticky bottom-0 z-10 flex items-center justify-between border-t border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800"
+                    >
+                      <div class="flex items-center gap-3">
+                        <button
+                          @click="closeReview()"
+                          class="rounded-lg border border-gray-300 bg-white px-6 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          @click="openDelegate()"
+                          class="rounded-lg border border-gray-300 bg-white px-6 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+                        >
+                          <span class="flex items-center gap-2">
+                            <svg
+                              class="h-4 w-4"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"
+                              ></path>
+                            </svg>
+                            Delegate
+                          </span>
+                        </button>
+                      </div>
+                      <div class="flex items-center gap-3">
+                        <button
+                          @click="rejectOrder()"
+                          :disabled="rejecting || approving"
+                          class="rounded-lg bg-red-600 px-6 py-2.5 text-sm font-medium text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-red-500 dark:hover:bg-red-600"
+                        >
+                          <template x-if="!rejecting">
+                            <span>Reject Order</span>
+                          </template>
+                          <template x-if="rejecting">
+                            <span class="flex items-center gap-2">
+                              <svg
+                                class="h-4 w-4 animate-spin"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                              >
+                                <circle
+                                  class="opacity-25"
+                                  cx="12"
+                                  cy="12"
+                                  r="10"
+                                  stroke="currentColor"
+                                  stroke-width="4"
+                                ></circle>
+                                <path
+                                  class="opacity-75"
+                                  fill="currentColor"
+                                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                ></path>
+                              </svg>
+                              Rejecting...
+                            </span>
+                          </template>
+                        </button>
+                        <button
+                          @click="initiateApprove()"
+                          :disabled="rejecting || approving"
+                          class="rounded-lg bg-green-600 px-6 py-2.5 text-sm font-medium text-white hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-green-500 dark:hover:bg-green-600"
+                        >
+                          <template x-if="!approving">
+                            <span
+                              x-text="selectedOrder.requiresPO ? 'Approve & Add PO' : 'Approve Order'"
+                            ></span>
+                          </template>
+                          <template x-if="approving">
+                            <span class="flex items-center gap-2">
+                              <svg
+                                class="h-4 w-4 animate-spin"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                              >
+                                <circle
+                                  class="opacity-25"
+                                  cx="12"
+                                  cy="12"
+                                  r="10"
+                                  stroke="currentColor"
+                                  stroke-width="4"
+                                ></circle>
+                                <path
+                                  class="opacity-75"
+                                  fill="currentColor"
+                                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                ></path>
+                              </svg>
+                              Approving...
+                            </span>
+                          </template>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </template>
+
+            <!-- Delegate Modal -->
+            <template x-if="delegateModal">
+              <div
+                class="bg-opacity-50 fixed inset-0 z-[99999] flex items-center justify-center bg-black p-4"
+                @click.self="delegateModal = false"
+              >
+                <div
+                  class="w-full max-w-md rounded-lg bg-white shadow-xl dark:bg-gray-800"
+                  @click.stop
+                >
+                  <div class="p-6">
+                    <h3 class="text-xl font-bold text-gray-900 dark:text-white">
+                      Delegate Approval
+                    </h3>
+                    <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
+                      Forward this order to another approver for review.
+                    </p>
+
+                    <div class="mt-4">
+                      <label
+                        class="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+                      >
+                        Delegate To <span class="text-red-500">*</span>
+                      </label>
+                      <select
+                        x-model="delegateTo"
+                        class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-transparent focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                      >
+                        <option value="">Select approver...</option>
+                        <option value="Finance Director">
+                          Finance Director
+                        </option>
+                        <option value="Operations Manager">
+                          Operations Manager
+                        </option>
+                        <option value="Senior Approver">Senior Approver</option>
+                        <option value="Budget Controller">
+                          Budget Controller
+                        </option>
+                      </select>
+                    </div>
+
+                    <div class="mt-4">
+                      <label
+                        class="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+                      >
+                        Reason (Optional)
+                      </label>
+                      <textarea
+                        x-model="approvalNotes"
+                        rows="3"
+                        class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-transparent focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                        placeholder="Why are you delegating this approval?"
+                      ></textarea>
+                    </div>
+
+                    <div class="mt-6 flex items-center justify-end gap-3">
+                      <button
+                        @click="delegateModal = false"
+                        class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        @click="processDelegate()"
+                        :disabled="!delegateTo || delegating"
+                        class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-blue-500 dark:hover:bg-blue-600"
+                      >
+                        <template x-if="!delegating">
+                          <span>Delegate Order</span>
+                        </template>
+                        <template x-if="delegating">
+                          <span class="flex items-center gap-2">
+                            <svg
+                              class="h-4 w-4 animate-spin"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                            >
+                              <circle
+                                class="opacity-25"
+                                cx="12"
+                                cy="12"
+                                r="10"
+                                stroke="currentColor"
+                                stroke-width="4"
+                              ></circle>
+                              <path
+                                class="opacity-75"
+                                fill="currentColor"
+                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                              ></path>
+                            </svg>
+                            Delegating...
+                          </span>
+                        </template>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </template>
+
+            <!-- Bulk Approve Modal -->
+            <template x-if="bulkApproveModal">
+              <div
+                class="bg-opacity-50 fixed inset-0 z-[99999] flex items-center justify-center bg-black p-4"
+                @click.self="bulkApproveModal = false"
+              >
+                <div
+                  class="w-full max-w-md rounded-lg bg-white shadow-xl dark:bg-gray-800"
+                  @click.stop
+                >
+                  <div class="p-6">
+                    <h3 class="text-xl font-bold text-gray-900 dark:text-white">
+                      Bulk Approve Orders
+                    </h3>
+                    <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
+                      You are about to approve
+                      <span
+                        class="font-bold"
+                        x-text="selectedOrders.length"
+                      ></span>
+                      orders. This action cannot be undone.
+                    </p>
+
+                    <div
+                      class="mt-4 flex items-center gap-3 rounded-lg border border-gray-200 p-4 dark:border-gray-700"
+                    >
+                      <input
+                        type="checkbox"
+                        x-model="sendNotification"
+                        id="bulkSendNotification"
+                        class="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700"
+                      />
+                      <label
+                        for="bulkSendNotification"
+                        class="flex-1 cursor-pointer"
+                      >
+                        <p
+                          class="text-sm font-medium text-gray-900 dark:text-white"
+                        >
+                          Send Email Notifications
+                        </p>
+                        <p class="text-xs text-gray-600 dark:text-gray-400">
+                          Notify all users of approval
+                        </p>
+                      </label>
+                    </div>
+
+                    <div class="mt-6 flex items-center justify-end gap-3">
+                      <button
+                        @click="bulkApproveModal = false"
+                        class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        @click="processBulkApprove()"
+                        :disabled="approving"
+                        class="rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-green-500 dark:hover:bg-green-600"
+                      >
+                        <template x-if="!approving">
+                          <span
+                            x-text="'Approve ' + selectedOrders.length + ' Orders'"
+                          ></span>
+                        </template>
+                        <template x-if="approving">
+                          <span class="flex items-center gap-2">
+                            <svg
+                              class="h-4 w-4 animate-spin"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                            >
+                              <circle
+                                class="opacity-25"
+                                cx="12"
+                                cy="12"
+                                r="10"
+                                stroke="currentColor"
+                                stroke-width="4"
+                              ></circle>
+                              <path
+                                class="opacity-75"
+                                fill="currentColor"
+                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                              ></path>
+                            </svg>
+                            Approving...
+                          </span>
+                        </template>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </template>
+
+            <!-- PO Number Modal -->
+            <template x-if="poNumberModal">
+              <div
+                class="bg-opacity-50 fixed inset-0 z-[99999] flex items-center justify-center bg-black p-4"
+                @click.self="poNumberModal = false"
+              >
+                <div
+                  class="w-full max-w-md rounded-lg bg-white shadow-xl dark:bg-gray-800"
+                  @click.stop
+                >
+                  <div class="p-6">
+                    <h3 class="text-xl font-bold text-gray-900 dark:text-white">
+                      Add PO Number
+                    </h3>
+                    <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
+                      This customer requires a Purchase Order number for all
+                      approvals.
+                    </p>
+
+                    <div class="mt-4">
+                      <label
+                        class="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+                      >
+                        PO Number <span class="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        x-model="poNumber"
+                        placeholder="e.g. PO-2025-001234"
+                        class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-transparent focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                      />
+                    </div>
+
+                    <div class="mt-6 flex items-center justify-end gap-3">
+                      <button
+                        @click="poNumberModal = false"
+                        class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        @click="approveOrder()"
+                        :disabled="!poNumber || approving"
+                        class="rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-green-500 dark:hover:bg-green-600"
+                      >
+                        <template x-if="!approving">
+                          <span>Approve with PO</span>
+                        </template>
+                        <template x-if="approving">
+                          <span class="flex items-center gap-2">
+                            <svg
+                              class="h-4 w-4 animate-spin"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                            >
+                              <circle
+                                class="opacity-25"
+                                cx="12"
+                                cy="12"
+                                r="10"
+                                stroke="currentColor"
+                                stroke-width="4"
+                              ></circle>
+                              <path
+                                class="opacity-75"
+                                fill="currentColor"
+                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                              ></path>
+                            </svg>
+                            Approving...
+                          </span>
+                        </template>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </template>
+
+            <!-- Success Modal -->
+            <template x-if="successModal">
+              <div
+                class="bg-opacity-50 fixed inset-0 z-[99999] flex items-center justify-center bg-black p-4"
+              >
+                <div
+                  class="animate-bounce-in w-full max-w-md rounded-lg bg-white shadow-xl dark:bg-gray-800"
+                >
+                  <div class="p-6 text-center">
+                    <div
+                      class="mx-auto flex h-16 w-16 items-center justify-center rounded-full"
+                      :class="actionType === 'approved' ? 'bg-green-100 dark:bg-green-900/30' : actionType === 'rejected' ? 'bg-red-100 dark:bg-red-900/30' : 'bg-blue-100 dark:bg-blue-900/30'"
+                    >
+                      <svg
+                        class="h-10 w-10"
+                        :class="actionType === 'approved' ? 'text-green-600 dark:text-green-400' : actionType === 'rejected' ? 'text-red-600 dark:text-red-400' : 'text-blue-600 dark:text-blue-400'"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <template x-if="actionType === 'approved'">
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M5 13l4 4L19 7"
+                          ></path>
+                        </template>
+                        <template x-if="actionType === 'rejected'">
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M6 18L18 6M6 6l12 12"
+                          ></path>
+                        </template>
+                        <template x-if="actionType === 'delegated'">
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"
+                          ></path>
+                        </template>
+                      </svg>
+                    </div>
+                    <h3
+                      class="mt-4 text-xl font-bold text-gray-900 dark:text-white"
+                      x-text="actionType === 'approved' ? 'Order Approved!' : actionType === 'rejected' ? 'Order Rejected' : 'Order Delegated'"
+                    ></h3>
+                    <p
+                      class="mt-2 text-sm text-gray-600 dark:text-gray-400"
+                      x-text="actionType === 'approved' ? 'The order has been approved and will be processed shortly.' : actionType === 'rejected' ? 'The order has been rejected and the user will be notified.' : 'The order has been delegated successfully.'"
+                    ></p>
+                  </div>
+                </div>
+              </div>
+            </template>
+          </div>
+        </main>
+        <!-- ===== Main Content End ===== -->
+      </div>
+      <!-- ===== Content Area End ===== -->
+    </div>
+    <!-- ===== Page Wrapper End ===== -->
+  </body>
+</html>

@@ -1,0 +1,354 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0"
+    />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Checkout | Purbeck Ice Cream B2B Portal</title>
+  </head>
+  <body
+    x-data="{
+      page: 'buyerCheckout',
+      'loaded': true,
+      'darkMode': false,
+      'cartCount': 3,
+      'user': {
+        name: 'Sarah Mitchell',
+        email: 'sarah.mitchell@thecornishcafe.co.uk',
+        company: 'The Cornish Cafe',
+        role: 'Buyer'
+      },
+      'step': 1,
+      'cartItems': [
+        { id: 1, name: 'Vanilla Bean', sku: 'VB-5L-NAP', price: 24.50, qty: 2, unit: '5L Napoli' },
+        { id: 2, name: 'Serious Chocolate', sku: 'CHO-5L-NAP', price: 26.00, qty: 1, unit: '5L Napoli' },
+        { id: 6, name: 'Cherry, Red Grape & Hibiscus Sorbet', sku: 'CRH-5L-NAP', price: 24.00, qty: 3, unit: '5L Napoli' }
+      ],
+      'dispatchSchedule': {
+        nextDispatch: 'Wednesday, 22nd January 2025',
+        frequency: '4th Wednesday of each month',
+        cutoffDate: 'Monday, 20th January 2025'
+      },
+      'deliveryAddress': 'The Cornish Cafe, Cornwall',
+      get subtotal() {
+        return this.cartItems.reduce((sum, item) => sum + (item.price * item.qty), 0);
+      },
+      placeOrder() {
+        alert('Order placed successfully! Order ID: ORD-2025-0345\\n\\nYour order has been confirmed and will be dispatched on ' + this.dispatchSchedule.nextDispatch + '.');
+        window.location.href = 'buyer-orders.html';
+      },
+      formatPrice(amount) {
+        return '£' + amount.toFixed(2);
+      }
+    }"
+    x-init="
+         darkMode = JSON.parse(localStorage.getItem('darkMode'));
+         $watch('darkMode', value => localStorage.setItem('darkMode', JSON.stringify(value)))"
+    :class="{'dark bg-gray-900': darkMode === true}"
+  >
+    <!-- ===== Preloader Start ===== -->
+    <include src="./partials/preloader.html"></include>
+    <!-- ===== Preloader End ===== -->
+
+    <!-- ===== Page Container ===== -->
+    <div class="flex min-h-screen flex-col bg-gray-50 dark:bg-gray-900">
+      <!-- ===== Top Navigation Bar ===== -->
+      <include src="./partials/buyer-nav.html"></include>
+
+      <!-- ===== Main Content ===== -->
+      <main class="flex-1 py-8">
+        <div class="mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8">
+          <!-- Page Header -->
+          <div class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-900 dark:text-white">
+              Checkout
+            </h1>
+            <p class="mt-2 text-gray-600 dark:text-gray-400">
+              Complete your order
+            </p>
+          </div>
+
+          <!-- Progress Steps -->
+          <div class="mb-8 flex items-center justify-center">
+            <div class="flex items-center gap-2">
+              <div
+                :class="step >= 1 ? 'bg-amber-600 text-white' : 'bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-400'"
+                class="flex h-10 w-10 items-center justify-center rounded-full font-semibold"
+              >
+                1
+              </div>
+              <span
+                :class="step >= 1 ? 'text-amber-600 dark:text-amber-400' : 'text-gray-600 dark:text-gray-400'"
+                class="text-sm font-medium"
+                >Delivery</span
+              >
+            </div>
+            <div class="mx-2 h-1 w-16 bg-gray-200 dark:bg-gray-700"></div>
+            <div class="flex items-center gap-2">
+              <div
+                :class="step >= 2 ? 'bg-amber-600 text-white' : 'bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-400'"
+                class="flex h-10 w-10 items-center justify-center rounded-full font-semibold"
+              >
+                2
+              </div>
+              <span
+                :class="step >= 2 ? 'text-amber-600 dark:text-amber-400' : 'text-gray-600 dark:text-gray-400'"
+                class="text-sm font-medium"
+                >Review</span
+              >
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 gap-8 lg:grid-cols-3">
+            <!-- Main Content -->
+            <div class="space-y-6 lg:col-span-2">
+              <!-- Step 1: Delivery Address -->
+              <div
+                x-show="step === 1"
+                class="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800"
+              >
+                <h2
+                  class="mb-6 text-xl font-bold text-gray-900 dark:text-white"
+                >
+                  Delivery Address
+                </h2>
+
+                <div class="mb-6 rounded-lg border border-gray-200 p-4 dark:border-gray-700">
+                  <div class="flex items-start gap-3">
+                    <svg class="h-5 w-5 mt-0.5 text-amber-600 dark:text-amber-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                    </svg>
+                    <div>
+                      <p class="text-sm font-medium text-gray-900 dark:text-white" x-text="deliveryAddress"></p>
+                      <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Primary delivery location</p>
+                    </div>
+                  </div>
+                </div>
+
+                <h3 class="mb-4 font-semibold text-gray-900 dark:text-white">Order Items</h3>
+                <div class="space-y-2 mb-6">
+                  <template x-for="item in cartItems" :key="item.id">
+                    <div class="flex items-center justify-between text-sm rounded-lg bg-gray-50 dark:bg-gray-900 p-3">
+                      <div>
+                        <p class="text-gray-900 dark:text-white font-medium" x-text="item.name"></p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400" x-text="'Qty: ' + item.qty + ' • ' + item.unit"></p>
+                      </div>
+                      <p class="text-gray-900 dark:text-white font-semibold" x-text="formatPrice(item.price * item.qty)"></p>
+                    </div>
+                  </template>
+                </div>
+
+                <button
+                  @click="step = 2"
+                  class="w-full flex items-center justify-center gap-2 rounded-lg bg-amber-600 px-6 py-3 text-sm font-medium text-white hover:bg-amber-700"
+                >
+                  Continue to Review
+                  <svg
+                    class="h-5 w-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M9 5l7 7-7 7"
+                    />
+                  </svg>
+                </button>
+              </div>
+
+              <!-- Step 2: Review & Place Order -->
+              <div
+                x-show="step === 2"
+                class="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800"
+              >
+                <h2
+                  class="mb-6 text-xl font-bold text-gray-900 dark:text-white"
+                >
+                  Review & Place Order
+                </h2>
+
+                <!-- Order Items -->
+                <div class="mb-6">
+                  <h3 class="mb-3 font-semibold text-gray-900 dark:text-white">
+                    Order Items
+                  </h3>
+                  <div class="space-y-2">
+                    <template x-for="item in cartItems" :key="item.id">
+                      <div
+                        class="flex items-center justify-between rounded-lg bg-gray-50 p-3 dark:bg-gray-900"
+                      >
+                        <div class="flex-1">
+                          <p
+                            class="text-sm font-medium text-gray-900 dark:text-white"
+                            x-text="item.name"
+                          ></p>
+                          <p class="text-xs text-gray-500 dark:text-gray-400">
+                            Qty: <span x-text="item.qty"></span> •
+                            <span x-text="item.unit"></span>
+                          </p>
+                        </div>
+                        <p
+                          class="text-sm font-semibold text-gray-900 dark:text-white"
+                          x-text="formatPrice(item.price * item.qty)"
+                        ></p>
+                      </div>
+                    </template>
+                  </div>
+                </div>
+
+                <!-- Order Details -->
+                <div class="mb-6 rounded-lg bg-gray-50 p-4 dark:bg-gray-900">
+                  <div class="space-y-2 text-sm">
+                    <div class="flex justify-between">
+                      <span class="text-gray-600 dark:text-gray-400"
+                        >Delivery Address:</span
+                      >
+                      <span
+                        class="font-medium text-gray-900 dark:text-white text-right text-xs"
+                        x-text="deliveryAddress"
+                      ></span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="flex gap-3">
+                  <button
+                    @click="step = 1"
+                    class="flex flex-1 items-center justify-center gap-2 rounded-lg border border-gray-300 px-6 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+                  >
+                    <svg
+                      class="h-5 w-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M15 19l-7-7 7-7"
+                      />
+                    </svg>
+                    Back
+                  </button>
+                  <button
+                    @click="placeOrder()"
+                    class="flex flex-1 items-center justify-center gap-2 rounded-lg bg-green-600 px-6 py-3 text-sm font-medium text-white hover:bg-green-700"
+                  >
+                    <svg
+                      class="h-5 w-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M5 13l4 4L19 7"
+                      />
+                    </svg>
+                    Place Order
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Order Summary Sidebar -->
+            <div class="lg:col-span-1">
+              <div
+                class="sticky top-24 rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800"
+              >
+                <h2
+                  class="mb-4 text-xl font-bold text-gray-900 dark:text-white"
+                >
+                  Order Summary
+                </h2>
+
+                <div
+                  class="mb-4 border-b border-gray-200 pb-4 dark:border-gray-700"
+                >
+                  <div class="mb-2 flex items-center justify-between">
+                    <span class="text-sm text-gray-600 dark:text-gray-400"
+                      >Subtotal</span
+                    >
+                    <span
+                      class="text-sm font-semibold text-gray-900 dark:text-white"
+                      x-text="formatPrice(subtotal)"
+                    ></span>
+                  </div>
+                  <div class="mb-2 flex items-center justify-between">
+                    <span class="text-sm text-gray-600 dark:text-gray-400"
+                      >Delivery</span
+                    >
+                    <span
+                      class="text-sm font-semibold text-green-600 dark:text-green-400"
+                      >FREE</span
+                    >
+                  </div>
+                </div>
+
+                <div class="mb-6 flex items-center justify-between">
+                  <span
+                    class="text-lg font-semibold text-gray-900 dark:text-white"
+                    >Total</span
+                  >
+                  <span
+                    class="text-2xl font-bold text-gray-900 dark:text-white"
+                    x-text="formatPrice(subtotal)"
+                  ></span>
+                </div>
+
+                <div class="rounded-lg bg-gray-50 p-4 dark:bg-gray-900">
+                  <p class="text-xs text-gray-600 dark:text-gray-400">
+                    By placing this order, you agree to Purbeck Ice Cream' terms
+                    and conditions
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <!-- ===== Footer ===== -->
+      <footer
+        class="mt-8 border-t border-gray-200 bg-white py-6 dark:border-gray-700 dark:bg-gray-800"
+      >
+        <div class="mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8">
+          <div
+            class="flex flex-col items-center justify-between gap-4 sm:flex-row"
+          >
+            <p class="text-sm text-gray-500 dark:text-gray-400">
+              © 2025 Purbeck Ice Cream. All rights reserved.
+            </p>
+            <div class="flex items-center gap-6 text-sm">
+              <a
+                href="#"
+                class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+                >Help & Support</a
+              >
+              <a
+                href="#"
+                class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+                >Terms & Conditions</a
+              >
+              <a
+                href="#"
+                class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+                >Privacy Policy</a
+              >
+            </div>
+          </div>
+        </div>
+      </footer>
+    </div>
+    <!-- ===== Page Container End ===== -->
+  </body>
+</html>

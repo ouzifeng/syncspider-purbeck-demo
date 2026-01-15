@@ -1,0 +1,299 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0"
+    />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Product Details | Purbeck Ice Cream B2B Portal</title>
+  </head>
+  <body
+    x-data="{
+      page: 'buyerProducts',
+      'loaded': true,
+      'darkMode': false,
+      'cartCount': 3,
+      'user': {
+        name: 'Sarah Mitchell',
+        email: 'sarah.mitchell@thecornishcafe.co.uk',
+        company: 'The Cornish Cafe',
+        role: 'Buyer'
+      },
+      'product': {
+        id: 6,
+        name: 'Cherry, Red Grape & Hibiscus Sorbet',
+        sku: 'CRH-SORBET',
+        description: 'A refreshing and vibrant sorbet combining the sweetness of cherries and red grapes with the delicate floral notes of hibiscus. Made with real fruit and no artificial colours or flavours. Perfect for a light, dairy-free dessert option.',
+        category: 'Sorbet',
+        image: './images/product/icrecream/cherry_hibiscus-400x400.png',
+        features: [
+          'Made with real cherries and red grapes',
+          'Natural hibiscus flower infusion',
+          'Dairy-free and vegan friendly',
+          'No artificial colours or flavours',
+          'Gluten-free',
+          'Store at -18°C or below'
+        ],
+        sizes: [
+          { name: '125ml', price: 2.50, sku: 'CRH-125' },
+          { name: '500ml', price: 5.95, sku: 'CRH-500' },
+          { name: '2L', price: 12.50, sku: 'CRH-2L' },
+          { name: '4L', price: 22.00, sku: 'CRH-4L' },
+          { name: '5L Napoli', price: 24.00, sku: 'CRH-5L' }
+        ]
+      },
+      'selectedSize': null,
+      'quantity': 1,
+      'bulkMode': false,
+      'bulkQuantities': {},
+      get currentPrice() {
+        return this.selectedSize ? this.selectedSize.price : 0;
+      },
+      get totalBulkQuantity() {
+        return Object.values(this.bulkQuantities).reduce((sum, qty) => sum + (parseInt(qty) || 0), 0);
+      },
+      get estimatedTotal() {
+        if (this.bulkMode) {
+          return this.selectedSize ? (this.selectedSize.price * this.totalBulkQuantity) : 0;
+        }
+        return this.currentPrice * this.quantity;
+      },
+      selectSize(size) {
+        this.selectedSize = size;
+      },
+      addToCart() {
+        if (!this.selectedSize) {
+          alert('Please select a size');
+          return;
+        }
+        if (this.bulkMode) {
+          if (this.totalBulkQuantity === 0) {
+            alert('Please enter quantities');
+            return;
+          }
+          this.cartCount += this.totalBulkQuantity;
+          alert('Added ' + this.totalBulkQuantity + ' items to cart\\n\\n' + this.product.name + '\\nSize: ' + this.selectedSize.name + '\\nQty: ' + this.totalBulkQuantity + '\\nTotal: ' + this.formatCurrency(this.estimatedTotal));
+        } else {
+          if (this.quantity < 1) {
+            alert('Please enter a valid quantity');
+            return;
+          }
+          this.cartCount += this.quantity;
+          alert('Added to cart:\\n\\n' + this.product.name + '\\nSize: ' + this.selectedSize.name + '\\nQty: ' + this.quantity + '\\nTotal: ' + this.formatCurrency(this.estimatedTotal));
+        }
+      },
+      formatCurrency(amount) {
+        return '£' + amount.toFixed(2);
+      },
+      initBulkQuantities() {
+        const quantities = {};
+        this.product.sizes.forEach(size => {
+          quantities[size.name] = 0;
+        });
+        this.bulkQuantities = quantities;
+      }
+    }"
+    x-init="
+         darkMode = JSON.parse(localStorage.getItem('darkMode'));
+         $watch('darkMode', value => localStorage.setItem('darkMode', JSON.stringify(value)));
+         initBulkQuantities()"
+    :class="{'dark bg-gray-900': darkMode === true}"
+  >
+    <!-- ===== Preloader Start ===== -->
+    <include src="./partials/preloader.html"></include>
+    <!-- ===== Preloader End ===== -->
+
+    <!-- ===== Page Container ===== -->
+    <div class="flex flex-col min-h-screen bg-gray-50 dark:bg-gray-900">
+      <!-- ===== Top Navigation Bar ===== -->
+      <include src="./partials/buyer-nav.html"></include>
+
+      <!-- ===== Main Content ===== -->
+      <main class="flex-1 py-8">
+        <div class="px-4 mx-auto max-w-screen-2xl sm:px-6 lg:px-8">
+          <!-- Breadcrumb -->
+          <div class="mb-6">
+            <nav class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+              <a href="buyer-dashboard.html" class="hover:text-amber-600 dark:hover:text-amber-400">Home</a>
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+              </svg>
+              <a href="buyer-products.html" class="hover:text-amber-600 dark:hover:text-amber-400">Products</a>
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+              </svg>
+              <span class="font-medium text-gray-900 dark:text-white" x-text="product.category"></span>
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+              </svg>
+              <span class="font-medium text-gray-900 dark:text-white" x-text="product.name"></span>
+            </nav>
+          </div>
+
+          <!-- Product Detail -->
+          <div class="grid grid-cols-1 gap-8 lg:grid-cols-2">
+            <!-- Left Column: Image -->
+            <div>
+              <div class="overflow-hidden bg-gray-100 border border-gray-200 rounded-2xl dark:bg-gray-700 dark:border-gray-700">
+                <img :src="product.image" :alt="product.name" class="object-contain w-full aspect-square" />
+              </div>
+            </div>
+
+            <!-- Right Column: Product Info -->
+            <div>
+              <div class="p-6 bg-white border border-gray-200 rounded-2xl dark:bg-gray-800 dark:border-gray-700">
+                <!-- Product Header -->
+                <div class="pb-6 mb-6 border-b border-gray-200 dark:border-gray-700">
+                  <span class="inline-block px-3 py-1 mb-3 text-xs font-medium text-amber-600 rounded-full bg-amber-50 dark:bg-amber-900/20 dark:text-amber-400" x-text="product.category"></span>
+                  <h1 class="mb-2 text-3xl font-bold text-gray-900 dark:text-white" x-text="product.name"></h1>
+                  <p class="text-sm text-gray-500 dark:text-gray-400">SKU: <span x-text="selectedSize ? selectedSize.sku : 'Select a size'"></span></p>
+                  <p class="mt-4 text-3xl font-bold text-gray-900 dark:text-white">
+                    <span x-text="selectedSize ? formatCurrency(selectedSize.price) : '—'"></span>
+                    <span class="text-base font-normal text-gray-500 dark:text-gray-400">per unit</span>
+                  </p>
+                </div>
+
+                <!-- Description -->
+                <div class="pb-6 mb-6 border-b border-gray-200 dark:border-gray-700">
+                  <h3 class="mb-3 text-sm font-semibold text-gray-900 dark:text-white">Description</h3>
+                  <p class="text-sm leading-relaxed text-gray-600 dark:text-gray-400" x-text="product.description"></p>
+                </div>
+
+                <!-- Size Selection -->
+                <div class="pb-6 mb-6 border-b border-gray-200 dark:border-gray-700">
+                  <h3 class="mb-3 text-sm font-semibold text-gray-900 dark:text-white">
+                    Size: <span x-show="selectedSize" class="text-amber-600 dark:text-amber-400" x-text="selectedSize.name"></span>
+                  </h3>
+                  <div class="grid grid-cols-2 gap-3">
+                    <template x-for="size in product.sizes" :key="size.name">
+                      <button
+                        @click="selectSize(size)"
+                        class="px-4 py-3 text-sm font-medium border-2 rounded-lg transition-all"
+                        :class="selectedSize === size ? 'border-amber-600 bg-amber-50 text-amber-600 dark:border-amber-400 dark:bg-amber-900/20 dark:text-amber-400' : 'border-gray-200 text-gray-700 hover:border-gray-300 dark:border-gray-700 dark:text-gray-300 dark:hover:border-gray-600'"
+                      >
+                        <span x-text="size.name"></span>
+                      </button>
+                    </template>
+                  </div>
+                </div>
+
+                <!-- Order Mode Toggle -->
+                <div class="pb-6 mb-6 border-b border-gray-200 dark:border-gray-700">
+                  <h3 class="mb-3 text-sm font-semibold text-gray-900 dark:text-white">Order Type</h3>
+                  <div class="inline-flex p-1 bg-gray-100 rounded-lg dark:bg-gray-700">
+                    <button
+                      @click="bulkMode = false"
+                      class="px-4 py-2 text-sm font-medium transition-colors rounded-md"
+                      :class="!bulkMode ? 'bg-white text-amber-600 shadow-sm dark:bg-gray-800 dark:text-amber-400' : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200'"
+                    >
+                      Single Order
+                    </button>
+                    <button
+                      @click="bulkMode = true"
+                      class="px-4 py-2 text-sm font-medium transition-colors rounded-md"
+                      :class="bulkMode ? 'bg-white text-amber-600 shadow-sm dark:bg-gray-800 dark:text-amber-400' : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200'"
+                    >
+                      Bulk Order
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Single Order Mode -->
+                <div x-show="!bulkMode" class="pb-6 mb-6 border-b border-gray-200 dark:border-gray-700">
+                  <label class="block mb-3 text-sm font-semibold text-gray-900 dark:text-white">Quantity</label>
+                  <div class="flex items-center gap-4">
+                    <div class="flex items-center border border-gray-300 rounded-lg dark:border-gray-600">
+                      <button @click="if(quantity > 1) quantity--" class="px-4 py-2 text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700">−</button>
+                      <input type="number" x-model.number="quantity" min="1" class="w-20 px-2 py-2 text-center border-x border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white focus:outline-none" />
+                      <button @click="quantity++" class="px-4 py-2 text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700">+</button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Bulk Order Mode -->
+                <div x-show="bulkMode" class="pb-6 mb-6 border-b border-gray-200 dark:border-gray-700">
+                  <h3 class="mb-3 text-sm font-semibold text-gray-900 dark:text-white">Enter Quantity for Each Size</h3>
+                  <div class="grid grid-cols-2 gap-3 mb-4">
+                    <template x-for="size in product.sizes" :key="size.name">
+                      <div>
+                        <label class="block mb-1 text-xs font-medium text-gray-700 dark:text-gray-300" x-text="size.name"></label>
+                        <input
+                          type="number"
+                          x-model.number="bulkQuantities[size.name]"
+                          min="0"
+                          placeholder="0"
+                          class="w-full px-3 py-2 border border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500"
+                        />
+                      </div>
+                    </template>
+                  </div>
+
+                  <div class="p-3 border border-gray-200 rounded-lg dark:border-gray-700">
+                    <div class="flex items-center justify-between">
+                      <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Total Units:</span>
+                      <span class="text-lg font-bold text-gray-900 dark:text-white" x-text="totalBulkQuantity"></span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Estimated Total -->
+                <div class="pb-6 mb-6">
+                  <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg bg-gray-50 dark:bg-gray-700/50 dark:border-gray-700">
+                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Estimated Total:</span>
+                    <span class="text-2xl font-bold text-gray-900 dark:text-white" x-text="formatCurrency(estimatedTotal)"></span>
+                  </div>
+                  <p class="mt-2 text-xs text-gray-500 dark:text-gray-400" x-show="selectedSize">
+                    <span x-show="!bulkMode" x-text="quantity + ' × ' + formatCurrency(selectedSize.price)"></span>
+                    <span x-show="bulkMode" x-text="totalBulkQuantity + ' × ' + formatCurrency(selectedSize.price)"></span>
+                  </p>
+                </div>
+
+                <!-- Add to Cart Button -->
+                <button @click="addToCart()" class="flex items-center justify-center w-full gap-2 px-6 py-4 text-base font-medium text-white bg-amber-600 rounded-lg hover:bg-amber-700 transition-colors">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                  </svg>
+                  Add to Cart
+                </button>
+
+                <!-- Product Features -->
+                <div class="mt-6">
+                  <h3 class="mb-3 text-sm font-semibold text-gray-900 dark:text-white">Product Features</h3>
+                  <ul class="space-y-2">
+                    <template x-for="feature in product.features" :key="feature">
+                      <li class="flex items-start gap-2 text-sm text-gray-600 dark:text-gray-400">
+                        <svg class="w-5 h-5 mt-0.5 text-green-600 dark:text-green-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                        <span x-text="feature"></span>
+                      </li>
+                    </template>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <!-- ===== Footer ===== -->
+      <footer class="py-6 mt-8 bg-white border-t border-gray-200 dark:bg-gray-800 dark:border-gray-700">
+        <div class="px-4 mx-auto max-w-screen-2xl sm:px-6 lg:px-8">
+          <div class="flex flex-col items-center justify-between gap-4 sm:flex-row">
+            <p class="text-sm text-gray-500 dark:text-gray-400">
+              © 2025 Purbeck Ice Cream. All rights reserved.
+            </p>
+            <div class="flex items-center gap-6 text-sm">
+              <a href="#" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300">Help & Support</a>
+              <a href="#" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300">Terms & Conditions</a>
+              <a href="#" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300">Privacy Policy</a>
+            </div>
+          </div>
+        </div>
+      </footer>
+    </div>
+    <!-- ===== Page Container End ===== -->
+  </body>
+</html>

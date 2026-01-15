@@ -1,0 +1,722 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0"
+    />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Product Management | Purbeck Ice Cream B2B Portal</title>
+  </head>
+  <body
+    x-data="{ page: 'productManagement', 'loaded': true, 'darkMode': false, 'stickyMenu': false, 'sidebarToggle': false, 'scrollTop': false }"
+    x-init="
+         darkMode = JSON.parse(localStorage.getItem('darkMode'));
+         $watch('darkMode', value => localStorage.setItem('darkMode', JSON.stringify(value)))"
+    :class="{'dark bg-gray-900': darkMode === true}"
+  >
+    <!-- ===== Preloader Start ===== -->
+    <include src="./partials/preloader.html"></include>
+    <!-- ===== Preloader End ===== -->
+
+    <!-- ===== Page Wrapper Start ===== -->
+    <div class="flex h-screen overflow-hidden">
+      <!-- ===== Sidebar Start ===== -->
+      <include src="./partials/sidebar.html"></include>
+      <!-- ===== Sidebar End ===== -->
+
+      <!-- ===== Content Area Start ===== -->
+      <div
+        class="relative flex flex-col flex-1 overflow-x-hidden overflow-y-auto"
+      >
+        <!-- Small Device Overlay Start -->
+        <include src="./partials/overlay.html" />
+        <!-- Small Device Overlay End -->
+
+        <!-- ===== Header Start ===== -->
+        <include src="./partials/header.html" />
+        <!-- ===== Header End ===== -->
+
+        <!-- ===== Main Content Start ===== -->
+        <main>
+          <div class="p-4 mx-auto max-w-screen-2xl md:p-6 2xl:p-10">
+            <!-- Product Management Component -->
+            <div
+              x-data="productManagement()"
+            >
+              <div x-init="console.log('Product Management initialized')"></div>
+              <!-- TEMP OLD DATA START
+              x-data="{
+                // State
+                products: [
+                  {
+                    id: 'PRD001',
+                    sku: 'PEN-BLK-100',
+                    name: 'Premium Ballpoint Pen - Black',
+                    category: 'Office Supplies',
+                    basePrice: 2.50,
+                    stock: 5420,
+                    supplier: 'Staples UK',
+                    image: 'https://via.placeholder.com/80x80/4F46E5/FFFFFF?text=Pen',
+                    visibleTo: ['Hugo Boss', 'Adidas UK', 'Nike Europe'],
+                    costCenters: ['Marketing', 'Corporate Gifts'],
+                    customPricing: [
+                      { customer: 'Hugo Boss', discount: 10 }
+                    ],
+                    volumePricing: [
+                      { minQty: 100, maxQty: 499, discount: 5 },
+                      { minQty: 500, maxQty: 999, discount: 10 },
+                      { minQty: 1000, maxQty: null, discount: 15 }
+                    ],
+                    status: 'active',
+                    lastSync: '2025-01-06 14:30:00'
+                  },
+                  {
+                    id: 'PRD002',
+                    sku: 'NOTE-A4-50',
+                    name: 'Leather Notebook A4',
+                    category: 'Office Supplies',
+                    basePrice: 15.99,
+                    stock: 890,
+                    supplier: 'Moleskine',
+                    image: 'https://via.placeholder.com/80x80/10B981/FFFFFF?text=Book',
+                    visibleTo: ['Hugo Boss', 'Nike Europe'],
+                    costCenters: ['Marketing', 'Events', 'Training Materials'],
+                    customPricing: [],
+                    volumePricing: [],
+                    status: 'active',
+                    lastSync: '2025-01-06 14:30:00'
+                  },
+                  {
+                    id: 'PRD003',
+                    sku: 'USB-32GB-BLK',
+                    name: 'USB Flash Drive 32GB',
+                    category: 'Technology',
+                    basePrice: 8.50,
+                    stock: 1250,
+                    supplier: 'SanDisk',
+                    image: 'https://via.placeholder.com/80x80/EF4444/FFFFFF?text=USB',
+                    visibleTo: ['Hugo Boss', 'Adidas UK'],
+                    costCenters: ['Corporate Gifts', 'Training Materials'],
+                    customPricing: [
+                      { customer: 'Adidas UK', discount: 15 }
+                    ],
+                    volumePricing: [],
+                    status: 'active',
+                    lastSync: '2025-01-06 14:30:00'
+                  },
+                  {
+                    id: 'PRD004',
+                    sku: 'TSHIRT-COT-WHT-L',
+                    name: 'Cotton T-Shirt White - Large',
+                    category: 'Apparel',
+                    basePrice: 12.00,
+                    stock: 3200,
+                    supplier: 'Gildan',
+                    image: 'https://via.placeholder.com/80x80/F59E0B/FFFFFF?text=Shirt',
+                    visibleTo: ['Hugo Boss', 'Adidas UK', 'Nike Europe'],
+                    costCenters: ['Marketing', 'Events', 'Retail Operations'],
+                    customPricing: [
+                      { customer: 'Hugo Boss', discount: 20 },
+                      { customer: 'Nike Europe', discount: 25 }
+                    ],
+                    volumePricing: [
+                      { minQty: 50, maxQty: 199, discount: 8 },
+                      { minQty: 200, maxQty: 499, discount: 15 },
+                      { minQty: 500, maxQty: null, discount: 22 }
+                    ],
+                    status: 'active',
+                    lastSync: '2025-01-06 14:30:00'
+                  },
+                  {
+                    id: 'PRD005',
+                    sku: 'BAG-TOTE-BLK',
+                    name: 'Canvas Tote Bag - Black',
+                    category: 'Bags',
+                    basePrice: 6.75,
+                    stock: 2100,
+                    supplier: 'BagBase',
+                    image: 'https://via.placeholder.com/80x80/8B5CF6/FFFFFF?text=Bag',
+                    visibleTo: ['Hugo Boss', 'Nike Europe'],
+                    costCenters: ['Marketing', 'Events'],
+                    customPricing: [],
+                    volumePricing: [],
+                    status: 'active',
+                    lastSync: '2025-01-06 14:30:00'
+                  },
+                  {
+                    id: 'PRD006',
+                    sku: 'MUG-CER-WHT-350',
+                    name: 'Ceramic Mug White 350ml',
+                    category: 'Drinkware',
+                    basePrice: 4.25,
+                    stock: 4800,
+                    supplier: 'Bullet',
+                    image: 'https://via.placeholder.com/80x80/06B6D4/FFFFFF?text=Mug',
+                    visibleTo: ['Hugo Boss', 'Adidas UK', 'Nike Europe'],
+                    costCenters: ['Corporate Gifts', 'Events'],
+                    customPricing: [
+                      { customer: 'Hugo Boss', discount: 5 }
+                    ],
+                    volumePricing: [
+                      { minQty: 100, maxQty: 249, discount: 7 },
+                      { minQty: 250, maxQty: null, discount: 12 }
+                    ],
+                    status: 'active',
+                    lastSync: '2025-01-06 14:30:00'
+                  },
+                  {
+                    id: 'PRD007',
+                    sku: 'LANYARD-POLY-BLK',
+                    name: 'Polyester Lanyard - Black',
+                    category: 'Accessories',
+                    basePrice: 1.20,
+                    stock: 8500,
+                    supplier: 'UK Lanyards',
+                    image: 'https://via.placeholder.com/80x80/EC4899/FFFFFF?text=Lany',
+                    visibleTo: ['Adidas UK', 'Nike Europe'],
+                    costCenters: ['Events', 'Training Materials'],
+                    customPricing: [],
+                    volumePricing: [],
+                    status: 'active',
+                    lastSync: '2025-01-06 14:30:00'
+                  },
+                  {
+                    id: 'PRD008',
+                    sku: 'WATER-BTL-750',
+                    name: 'Stainless Steel Water Bottle 750ml',
+                    category: 'Drinkware',
+                    basePrice: 18.50,
+                    stock: 650,
+                    supplier: 'S\'well',
+                    image: 'https://via.placeholder.com/80x80/14B8A6/FFFFFF?text=H2O',
+                    visibleTo: ['Hugo Boss', 'Nike Europe'],
+                    costCenters: ['Corporate Gifts', 'Marketing'],
+                    customPricing: [
+                      { customer: 'Nike Europe', discount: 30 }
+                    ],
+                    volumePricing: [],
+                    status: 'active',
+                    lastSync: '2025-01-06 14:30:00'
+                  },
+                  {
+                    id: 'PRD009',
+                    sku: 'CAP-COT-BLK',
+                    name: 'Cotton Baseball Cap - Black',
+                    category: 'Apparel',
+                    basePrice: 9.99,
+                    stock: 1800,
+                    supplier: 'Beechfield',
+                    image: 'https://via.placeholder.com/80x80/F97316/FFFFFF?text=Cap',
+                    visibleTo: ['Adidas UK', 'Nike Europe'],
+                    costCenters: ['Marketing', 'Events'],
+                    customPricing: [
+                      { customer: 'Adidas UK', discount: 12 }
+                    ],
+                    volumePricing: [],
+                    status: 'active',
+                    lastSync: '2025-01-06 14:30:00'
+                  },
+                  {
+                    id: 'PRD010',
+                    sku: 'BADGE-PIN-50MM',
+                    name: 'Button Badge 50mm',
+                    category: 'Accessories',
+                    basePrice: 0.85,
+                    stock: 12000,
+                    supplier: 'BadgeMaster',
+                    image: 'https://via.placeholder.com/80x80/A855F7/FFFFFF?text=Pin',
+                    visibleTo: ['Hugo Boss'],
+                    costCenters: ['Events'],
+                    customPricing: [],
+                    volumePricing: [],
+                    status: 'inactive',
+                    lastSync: '2025-01-06 14:30:00'
+                  }
+                ],
+
+                // Available options
+                allCustomers: ['Hugo Boss', 'Adidas UK', 'Nike Europe'],
+                allCostCenters: ['Menswear', 'Womenswear', 'Accessories', 'Footwear', 'Marketing', 'Events', 'Corporate Gifts', 'Retail Operations', 'Store Supplies', 'Training Materials', 'Performance', 'Lifestyle', 'Equipment', 'Apparel'],
+                allCategories: ['Office Supplies', 'Technology', 'Apparel', 'Bags', 'Drinkware', 'Accessories'],
+
+                // Filters
+                searchQuery: '',
+                filterCategory: 'all',
+                filterCustomer: 'all',
+                filterCostCenter: 'all',
+                filterStatus: 'all',
+
+                // Modals
+                editProductModal: false,
+                bulkImportModal: false,
+
+                // Forms
+                editingProduct: null,
+
+                // Bulk import
+                csvFile: null,
+                csvFileName: '',
+                importing: false,
+
+                // Success message
+                successMessage: '',
+
+                // Computed: Filtered products
+                get filteredProducts() {
+                  return this.products.filter(product => {
+                    if (this.filterCategory !== 'all' && product.category !== this.filterCategory) return false;
+                    if (this.filterCustomer !== 'all' && !product.visibleTo.includes(this.filterCustomer)) return false;
+                    if (this.filterCostCenter !== 'all' && !product.costCenters.includes(this.filterCostCenter)) return false;
+                    if (this.filterStatus !== 'all' && product.status !== this.filterStatus) return false;
+                    if (this.searchQuery) {
+                      const query = this.searchQuery.toLowerCase();
+                      return product.name.toLowerCase().includes(query) ||
+                             product.sku.toLowerCase().includes(query) ||
+                             product.category.toLowerCase().includes(query);
+                    }
+                    return true;
+                  });
+                },
+
+                // Methods
+                openEditProduct(product) {
+                  this.editingProduct = JSON.parse(JSON.stringify(product));
+                  this.editProductModal = true;
+                },
+
+                saveProduct() {
+                  if (this.editingProduct.visibleTo.length === 0) {
+                    alert('Product must be visible to at least one customer');
+                    return;
+                  }
+                  if (this.editingProduct.costCenters.length === 0) {
+                    alert('Product must be assigned to at least one cost center');
+                    return;
+                  }
+
+                  const index = this.products.findIndex(p => p.id === this.editingProduct.id);
+                  if (index > -1) {
+                    this.products[index] = this.editingProduct;
+                  }
+
+                  this.editProductModal = false;
+                  this.showSuccess('Product configuration updated successfully');
+                },
+
+                toggleProductStatus(product) {
+                  product.status = product.status === 'active' ? 'inactive' : 'active';
+                  this.showSuccess('Product status updated');
+                },
+
+                toggleCustomerVisibility(customer) {
+                  const index = this.editingProduct.visibleTo.indexOf(customer);
+                  if (index > -1) {
+                    this.editingProduct.visibleTo.splice(index, 1);
+                  } else {
+                    this.editingProduct.visibleTo.push(customer);
+                  }
+                },
+
+                isCustomerVisible(customer) {
+                  return this.editingProduct.visibleTo.includes(customer);
+                },
+
+                toggleCostCenter(costCenter) {
+                  const index = this.editingProduct.costCenters.indexOf(costCenter);
+                  if (index > -1) {
+                    this.editingProduct.costCenters.splice(index, 1);
+                  } else {
+                    this.editingProduct.costCenters.push(costCenter);
+                  }
+                },
+
+                isCostCenterAssigned(costCenter) {
+                  return this.editingProduct.costCenters.includes(costCenter);
+                },
+
+                getCustomDiscount(customer) {
+                  const pricing = this.editingProduct.customPricing.find(p => p.customer === customer);
+                  return pricing ? pricing.discount : 0;
+                },
+
+                setCustomDiscount(customer, discount) {
+                  const index = this.editingProduct.customPricing.findIndex(p => p.customer === customer);
+                  if (discount > 0) {
+                    if (index > -1) {
+                      this.editingProduct.customPricing[index].discount = discount;
+                    } else {
+                      this.editingProduct.customPricing.push({ customer, discount });
+                    }
+                  } else {
+                    if (index > -1) {
+                      this.editingProduct.customPricing.splice(index, 1);
+                    }
+                  }
+                },
+
+                calculatePrice(basePrice, customer) {
+                  const product = this.editingProduct;
+                  const pricing = product.customPricing.find(p => p.customer === customer);
+                  if (pricing && pricing.discount > 0) {
+                    return (basePrice * (1 - pricing.discount / 100)).toFixed(2);
+                  }
+                  return basePrice.toFixed(2);
+                },
+
+                addVolumeTier() {
+                  this.editingProduct.volumePricing.push({ minQty: 0, maxQty: null, discount: 0 });
+                },
+
+                removeVolumeTier(index) {
+                  this.editingProduct.volumePricing.splice(index, 1);
+                },
+
+                exportCSV() {
+                  const csvRows = [];
+                  // Header
+                  csvRows.push('SKU,Name,Visible To,Cost Centers,Custom Pricing,Volume Pricing,Status');
+
+                  // Data rows
+                  this.filteredProducts.forEach(product => {
+                    const visibleTo = product.visibleTo.join(';');
+                    const costCenters = product.costCenters.join(';');
+                    const customPricing = product.customPricing.map(p => `${p.customer}:${p.discount}%`).join(';');
+                    const volumePricing = product.volumePricing.map(v => `${v.minQty}-${v.maxQty || '∞'}:${v.discount}%`).join(';');
+                    csvRows.push(`${product.sku},"${product.name}","${visibleTo}","${costCenters}","${customPricing}","${volumePricing}",${product.status}`);
+                  });
+
+                  const csvContent = csvRows.join('\\n');
+                  const blob = new Blob([csvContent], { type: 'text/csv' });
+                  const url = window.URL.createObjectURL(blob);
+                  const a = document.createElement('a');
+                  a.href = url;
+                  a.download = `product-config-${new Date().toISOString().split('T')[0]}.csv`;
+                  a.click();
+                  window.URL.revokeObjectURL(url);
+                  this.showSuccess('Configuration exported to CSV');
+                },
+
+                handleFileSelect(event) {
+                  const file = event.target.files[0];
+                  if (file) {
+                    this.csvFile = file;
+                    this.csvFileName = file.name;
+                  }
+                },
+
+                importProducts() {
+                  if (!this.csvFile) {
+                    alert('Please select a CSV file');
+                    return;
+                  }
+
+                  this.importing = true;
+                  setTimeout(() => {
+                    // Simulate import of 2 products
+                    const importedProducts = [
+                      {
+                        id: 'PRD' + String(this.products.length + 1).padStart(3, '0'),
+                        sku: 'HOODIE-COT-GRY-M',
+                        name: 'Cotton Hoodie Grey - Medium',
+                        category: 'Apparel',
+                        basePrice: 28.50,
+                        stock: 450,
+                        supplier: 'Gildan',
+                        image: 'https://via.placeholder.com/80x80/6366F1/FFFFFF?text=Hood',
+                        visibleTo: ['Hugo Boss', 'Adidas UK'],
+                        costCenters: ['Marketing', 'Events'],
+                        customPricing: [],
+                        volumePricing: [],
+                        status: 'active',
+                        lastSync: new Date().toISOString().replace('T', ' ').substring(0, 19)
+                      },
+                      {
+                        id: 'PRD' + String(this.products.length + 2).padStart(3, '0'),
+                        sku: 'BACKPACK-POLY-BLK',
+                        name: 'Polyester Backpack - Black',
+                        category: 'Bags',
+                        basePrice: 24.99,
+                        stock: 780,
+                        supplier: 'BagBase',
+                        image: 'https://via.placeholder.com/80x80/059669/FFFFFF?text=Pack',
+                        visibleTo: ['Nike Europe'],
+                        costCenters: ['Corporate Gifts', 'Marketing'],
+                        customPricing: [],
+                        volumePricing: [],
+                        status: 'active',
+                        lastSync: new Date().toISOString().replace('T', ' ').substring(0, 19)
+                      }
+                    ];
+
+                    this.products.push(...importedProducts);
+                    this.importing = false;
+                    this.bulkImportModal = false;
+                    this.csvFile = null;
+                    this.csvFileName = '';
+                    this.showSuccess('2 products imported successfully');
+                  }, 2000);
+                },
+
+                showSuccess(message) {
+                  this.successMessage = message;
+                  setTimeout(() => { this.successMessage = ''; }, 3000);
+                },
+
+                formatDate(dateStr) {
+                  const date = new Date(dateStr);
+                  const now = new Date();
+                  const diffMs = now - date;
+                  const diffMins = Math.floor(diffMs / 60000);
+                  const diffHours = Math.floor(diffMs / 3600000);
+
+                  if (diffMins < 60) return diffMins + 'm ago';
+                  if (diffHours < 24) return diffHours + 'h ago';
+                  return date.toLocaleDateString();
+                }
+              }"
+            TEMP OLD DATA END -->
+              <!-- Header -->
+              <div class="mb-6">
+                <h2 class="mb-2 text-2xl font-bold text-gray-900 dark:text-white">
+                  Product Management
+                </h2>
+                <p class="text-sm text-gray-600 dark:text-gray-400">
+                  Manage ice cream product catalog and stock levels
+                </p>
+              </div>
+
+              <!-- Success Message -->
+              <template x-if="successMessage">
+                <div class="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg flex items-center gap-2 text-green-800 dark:bg-green-900/20 dark:border-green-800 dark:text-green-400">
+                  <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                  </svg>
+                  <span x-text="successMessage"></span>
+                </div>
+              </template>
+
+              <!-- Actions Bar -->
+              <div class="mb-6 flex flex-wrap items-center gap-4 justify-between">
+                <div class="flex flex-wrap items-center gap-4">
+                  <!-- Search -->
+                  <div class="relative">
+                    <input
+                      type="text"
+                      x-model="searchQuery"
+                      placeholder="Search products..."
+                      class="py-2 pl-10 pr-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:border-gray-700 dark:text-white"
+                    />
+                    <svg class="absolute left-3 top-2.5 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                    </svg>
+                  </div>
+
+                  <!-- Filter by Category -->
+                  <select
+                    x-model="filterCategory"
+                    class="py-2 px-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:border-gray-700 dark:text-white"
+                  >
+                    <option value="all">All Categories</option>
+                    <template x-for="cat in allCategories" :key="cat">
+                      <option :value="cat" x-text="cat"></option>
+                    </template>
+                  </select>
+
+                  <!-- Filter by Status -->
+                  <select
+                    x-model="filterStatus"
+                    class="py-2 px-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:border-gray-700 dark:text-white"
+                  >
+                    <option value="all">All Status</option>
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Products Table -->
+              <div class="bg-white rounded-lg shadow dark:bg-gray-800 overflow-hidden">
+                <div class="overflow-x-auto">
+                  <table class="w-full">
+                    <thead class="bg-gray-50 dark:bg-gray-700">
+                      <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Product</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Category</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Price</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Stock</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Status</th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700">
+                      <template x-for="product in filteredProducts" :key="product.id">
+                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
+                          <td class="px-6 py-4">
+                            <div>
+                              <div class="font-medium text-gray-900 dark:text-white" x-text="product.name"></div>
+                              <div class="text-xs text-gray-500 dark:text-gray-400" x-text="product.sku"></div>
+                            </div>
+                          </td>
+                          <td class="px-6 py-4">
+                            <span class="px-2 py-1 text-xs font-medium rounded-full"
+                              :class="{
+                                'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400': product.category === 'Dairy Ice Cream',
+                                'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400': product.category === 'Vegan Ice Cream',
+                                'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400': product.category === 'Sorbet'
+                              }"
+                              x-text="product.category"></span>
+                          </td>
+                          <td class="px-6 py-4">
+                            <div class="text-sm font-medium text-gray-900 dark:text-white">£<span x-text="product.basePrice.toFixed(2)"></span></div>
+                          </td>
+                          <td class="px-6 py-4">
+                            <span class="text-sm"
+                              :class="product.stock === 0 ? 'text-red-600 font-medium dark:text-red-400' : product.stock < 30 ? 'text-orange-600 dark:text-orange-400' : 'text-gray-900 dark:text-white'"
+                              x-text="product.stock === 0 ? 'Out of stock' : product.stock"></span>
+                          </td>
+                          <td class="px-6 py-4">
+                            <button
+                              @click="toggleProductStatus(product)"
+                              class="px-3 py-1 text-xs font-medium rounded-full transition-colors"
+                              :class="product.status === 'active' ? 'bg-green-100 text-green-800 hover:bg-green-200 dark:bg-green-900/30 dark:text-green-400' : 'bg-gray-100 text-gray-800 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-400'"
+                              x-text="product.status === 'active' ? 'Active' : 'Inactive'"
+                            ></button>
+                          </td>
+                          <td class="px-6 py-4 text-right">
+                            <button
+                              @click="openEditProduct(product)"
+                              class="px-3 py-1 text-sm text-blue-600 hover:bg-blue-50 rounded dark:text-blue-400 dark:hover:bg-blue-900/30"
+                            >
+                              Edit
+                            </button>
+                          </td>
+                        </tr>
+                      </template>
+                    </tbody>
+                  </table>
+                </div>
+
+                <!-- Empty state -->
+                <template x-if="filteredProducts.length === 0">
+                  <div class="px-6 py-12 text-center">
+                    <svg class="mx-auto w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                    </svg>
+                    <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">No products found</p>
+                  </div>
+                </template>
+              </div>
+
+              <!-- Edit Product Modal -->
+              <template x-if="editProductModal && editingProduct">
+                <div class="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black bg-opacity-50">
+                  <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-lg w-full">
+                    <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+                      <div class="flex items-center justify-between">
+                        <h3 class="text-xl font-semibold text-gray-900 dark:text-white">Edit Product</h3>
+                        <button @click="editProductModal = false" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                    <div class="p-6 space-y-4">
+                      <!-- Product Name -->
+                      <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Product Name</label>
+                        <input
+                          type="text"
+                          x-model="editingProduct.name"
+                          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                        />
+                      </div>
+
+                      <!-- SKU -->
+                      <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">SKU</label>
+                        <input
+                          type="text"
+                          x-model="editingProduct.sku"
+                          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                        />
+                      </div>
+
+                      <!-- Category -->
+                      <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Category</label>
+                        <select
+                          x-model="editingProduct.category"
+                          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                        >
+                          <template x-for="cat in allCategories" :key="cat">
+                            <option :value="cat" x-text="cat"></option>
+                          </template>
+                        </select>
+                      </div>
+
+                      <!-- Price and Stock -->
+                      <div class="grid grid-cols-2 gap-4">
+                        <div>
+                          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Price (£)</label>
+                          <input
+                            type="number"
+                            x-model="editingProduct.basePrice"
+                            min="0"
+                            step="0.01"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                          />
+                        </div>
+                        <div>
+                          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Stock</label>
+                          <input
+                            type="number"
+                            x-model="editingProduct.stock"
+                            min="0"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                          />
+                        </div>
+                      </div>
+
+                      <!-- Status -->
+                      <div class="flex items-center justify-between p-3 border border-gray-200 rounded-lg dark:border-gray-700">
+                        <div>
+                          <p class="font-medium text-gray-900 dark:text-white">Product Status</p>
+                          <p class="text-xs text-gray-600 dark:text-gray-400">Enable or disable this product</p>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                          <input type="checkbox" :checked="editingProduct.status === 'active'" @change="editingProduct.status = $event.target.checked ? 'active' : 'inactive'" class="sr-only peer">
+                          <div class="w-11 h-6 bg-gray-200 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-green-600"></div>
+                        </label>
+                      </div>
+                    </div>
+                    <div class="p-6 border-t border-gray-200 dark:border-gray-700 flex justify-end gap-3">
+                      <button
+                        @click="editProductModal = false"
+                        class="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-600"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        @click="saveProduct()"
+                        class="px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700"
+                      >
+                        Save Changes
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </template>
+
+            </div>
+          </div>
+        </main>
+        <!-- ===== Main Content End ===== -->
+      </div>
+      <!-- ===== Content Area End ===== -->
+    </div>
+    <!-- ===== Page Wrapper End ===== -->
+  </body>
+</html>

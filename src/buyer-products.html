@@ -1,0 +1,354 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0"
+    />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Browse Products | Purbeck Ice Cream B2B Portal</title>
+  </head>
+  <body
+    x-data="{
+      page: 'buyerProducts',
+      'loaded': true,
+      'darkMode': false,
+      'cartCount': 3,
+      'user': {
+        name: 'Sarah Mitchell',
+        email: 'sarah.mitchell@thecornishcafe.co.uk',
+        company: 'The Cornish Cafe',
+        role: 'Buyer'
+      },
+      'selectedCategory': 'all',
+      'sortBy': 'name',
+      'viewMode': 'grid',
+      'products': [
+        { id: 1, name: 'Vanilla Bean', sku: 'VB-5L-NAP', price: 24.50, image: './images/product/icrecream/vb-400x400.png', category: 'Dairy Ice Cream', stock: 145, unit: '5L Napoli' },
+        { id: 2, name: 'Serious Chocolate', sku: 'CHO-5L-NAP', price: 26.00, image: './images/product/icrecream/chocolate-400x400.png', category: 'Dairy Ice Cream', stock: 112, unit: '5L Napoli' },
+        { id: 3, name: 'Honeycombe Hash', sku: 'HH-5L-NAP', price: 26.00, image: './images/product/icrecream/hh-400x400.png', category: 'Dairy Ice Cream', stock: 73, unit: '5L Napoli' },
+        { id: 4, name: 'Chocolate Orange', sku: 'CO-5L-NAP', price: 26.00, image: './images/product/icrecream/choc_orange-400x400.png', category: 'Dairy Ice Cream', stock: 64, unit: '5L Napoli' },
+        { id: 5, name: 'Orange Choc Chip', sku: 'OCC-5L-NAP', price: 26.00, image: './images/product/icrecream/choc_orange-400x400.png', category: 'Dairy Ice Cream', stock: 52, unit: '5L Napoli' },
+        { id: 6, name: 'Cherry, Red Grape & Hibiscus Sorbet', sku: 'CRH-5L-NAP', price: 24.00, image: './images/product/icrecream/cherry_hibiscus-400x400.png', category: 'Sorbet', stock: 38, unit: '5L Napoli' }
+      ],
+      get filteredProducts() {
+        let filtered = this.products;
+        if (this.selectedCategory !== 'all') {
+          filtered = filtered.filter(p => p.category === this.selectedCategory);
+        }
+        if (this.sortBy === 'price-low') {
+          filtered = [...filtered].sort((a, b) => a.price - b.price);
+        } else if (this.sortBy === 'price-high') {
+          filtered = [...filtered].sort((a, b) => b.price - a.price);
+        } else if (this.sortBy === 'name') {
+          filtered = [...filtered].sort((a, b) => a.name.localeCompare(b.name));
+        }
+        return filtered;
+      },
+      addToCart(product) {
+        this.cartCount++;
+        alert('Added to cart: ' + product.name);
+      },
+      formatPrice(price) {
+        return '£' + price.toFixed(2);
+      }
+    }"
+    x-init="
+         darkMode = JSON.parse(localStorage.getItem('darkMode'));
+         $watch('darkMode', value => localStorage.setItem('darkMode', JSON.stringify(value)))"
+    :class="{'dark bg-gray-900': darkMode === true}"
+  >
+    <!-- ===== Preloader Start ===== -->
+    <include src="./partials/preloader.html"></include>
+    <!-- ===== Preloader End ===== -->
+
+    <!-- ===== Page Container ===== -->
+    <div class="flex min-h-screen flex-col bg-gray-50 dark:bg-gray-900">
+      <!-- ===== Top Navigation Bar ===== -->
+      <include src="./partials/buyer-nav.html"></include>
+
+      <!-- ===== Main Content ===== -->
+      <main class="flex-1 py-8">
+        <div class="mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8">
+          <!-- Page Header -->
+          <div class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-900 dark:text-white">
+              Browse Products
+            </h1>
+            <p class="mt-2 text-gray-600 dark:text-gray-400">
+              <span x-text="filteredProducts.length"></span> products available
+            </p>
+          </div>
+
+          <div class="grid grid-cols-1 gap-8 lg:grid-cols-4">
+            <!-- Sidebar Filters -->
+            <div class="lg:col-span-1">
+              <div
+                class="sticky top-24 rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800"
+              >
+                <h3
+                  class="mb-4 text-lg font-bold text-gray-900 dark:text-white"
+                >
+                  Filters
+                </h3>
+
+                <!-- Category Filter -->
+                <div class="mb-6">
+                  <label
+                    class="mb-3 block text-sm font-medium text-gray-700 dark:text-gray-300"
+                    >Category</label
+                  >
+                  <select
+                    x-model="selectedCategory"
+                    class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                  >
+                    <option value="all">All Categories</option>
+                    <option value="Dairy Ice Cream">Dairy Ice Cream</option>
+                    <option value="Sorbet">Sorbet</option>
+                  </select>
+                </div>
+
+                <!-- Sort By -->
+                <div class="mb-6">
+                  <label
+                    class="mb-3 block text-sm font-medium text-gray-700 dark:text-gray-300"
+                    >Sort By</label
+                  >
+                  <select
+                    x-model="sortBy"
+                    class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                  >
+                    <option value="name">Name (A-Z)</option>
+                    <option value="price-low">Price (Low to High)</option>
+                    <option value="price-high">Price (High to Low)</option>
+                  </select>
+                </div>
+
+                <!-- Clear Filters -->
+                <button
+                  @click="selectedCategory = 'all'; sortBy = 'name'"
+                  class="w-full rounded-lg border border-amber-600 px-4 py-2 text-sm font-medium text-amber-600 hover:bg-amber-50 dark:border-amber-400 dark:text-amber-400 dark:hover:bg-amber-900/20"
+                >
+                  Clear All Filters
+                </button>
+              </div>
+            </div>
+
+            <!-- Products Grid -->
+            <div class="lg:col-span-3">
+              <!-- View Toggle -->
+              <div class="mb-6 flex items-center justify-between">
+                <p class="text-sm text-gray-600 dark:text-gray-400">
+                  Showing
+                  <span x-text="filteredProducts.length"></span> products
+                </p>
+                <div class="flex items-center gap-2">
+                  <button
+                    @click="viewMode = 'grid'"
+                    :class="viewMode === 'grid' ? 'bg-amber-600 text-white' : 'bg-white text-gray-600 dark:bg-gray-800 dark:text-gray-300'"
+                    class="rounded-lg border border-gray-300 p-2 dark:border-gray-700"
+                  >
+                    <svg
+                      class="h-5 w-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"
+                      />
+                    </svg>
+                  </button>
+                  <button
+                    @click="viewMode = 'list'"
+                    :class="viewMode === 'list' ? 'bg-amber-600 text-white' : 'bg-white text-gray-600 dark:bg-gray-800 dark:text-gray-300'"
+                    class="rounded-lg border border-gray-300 p-2 dark:border-gray-700"
+                  >
+                    <svg
+                      class="h-5 w-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M4 6h16M4 12h16M4 18h16"
+                      />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Grid View -->
+              <div
+                x-show="viewMode === 'grid'"
+                class="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3"
+              >
+                <template x-for="product in filteredProducts" :key="product.id">
+                  <div
+                    class="overflow-hidden rounded-2xl border border-gray-200 bg-white transition-shadow hover:shadow-lg dark:border-gray-700 dark:bg-gray-800"
+                  >
+                    <!-- Product Image -->
+                    <a
+                      :href="'buyer-product-detail.html?id=' + product.id"
+                      class="relative block aspect-square overflow-hidden bg-gray-100 dark:bg-gray-700"
+                    >
+                      <img
+                        :src="product.image"
+                        :alt="product.name"
+                        class="h-full w-full object-contain transition-transform duration-300 hover:scale-105"
+                      />
+                    </a>
+
+                    <!-- Product Info -->
+                    <div class="p-4">
+                      <p
+                        class="mb-1 text-xs text-gray-500 dark:text-gray-400"
+                        x-text="product.category"
+                      ></p>
+                      <a
+                        :href="'buyer-product-detail.html?id=' + product.id"
+                        class="mb-2 block"
+                      >
+                        <h3
+                          class="line-clamp-2 text-base font-semibold text-gray-900 hover:text-amber-600 dark:text-white dark:hover:text-amber-400"
+                          x-text="product.name"
+                        ></h3>
+                      </a>
+                      <p class="mb-1 text-xs text-gray-500 dark:text-gray-400">
+                        SKU: <span x-text="product.sku"></span>
+                      </p>
+                      <p class="mb-3 text-xs text-gray-500 dark:text-gray-400">
+                        <span
+                          class="text-green-600 dark:text-green-400"
+                          x-text="product.stock"
+                        ></span>
+                        in stock
+                      </p>
+
+                      <div class="flex items-center justify-between">
+                        <div>
+                          <p
+                            class="text-2xl font-bold text-gray-900 dark:text-white"
+                            x-text="formatPrice(product.price)"
+                          ></p>
+                          <p class="text-xs text-gray-500 dark:text-gray-400">
+                            per <span x-text="product.unit"></span>
+                          </p>
+                        </div>
+                        <button
+                          @click="addToCart(product)"
+                          class="rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-amber-700"
+                        >
+                          Select Options
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </template>
+              </div>
+
+              <!-- List View -->
+              <div x-show="viewMode === 'list'" class="space-y-4">
+                <template x-for="product in filteredProducts" :key="product.id">
+                  <div
+                    class="flex gap-4 rounded-2xl border border-gray-200 bg-white p-4 transition-shadow hover:shadow-lg dark:border-gray-700 dark:bg-gray-800"
+                  >
+                    <a
+                      :href="'buyer-product-detail.html?id=' + product.id"
+                      class="flex-shrink-0"
+                    >
+                      <img
+                        :src="product.image"
+                        :alt="product.name"
+                        class="h-32 w-32 rounded-lg object-cover"
+                      />
+                    </a>
+                    <div class="flex-1">
+                      <p
+                        class="mb-1 text-xs text-gray-500 dark:text-gray-400"
+                        x-text="product.category"
+                      ></p>
+                      <a :href="'buyer-product-detail.html?id=' + product.id">
+                        <h3
+                          class="mb-2 text-lg font-semibold text-gray-900 hover:text-amber-600 dark:text-white dark:hover:text-amber-400"
+                          x-text="product.name"
+                        ></h3>
+                      </a>
+                      <p class="mb-1 text-sm text-gray-500 dark:text-gray-400">
+                        SKU: <span x-text="product.sku"></span>
+                      </p>
+                      <p class="text-sm text-gray-500 dark:text-gray-400">
+                        <span
+                          class="text-green-600 dark:text-green-400"
+                          x-text="product.stock"
+                        ></span>
+                        in stock
+                      </p>
+                    </div>
+                    <div class="flex flex-col items-end justify-between">
+                      <div class="text-right">
+                        <p
+                          class="text-2xl font-bold text-gray-900 dark:text-white"
+                          x-text="formatPrice(product.price)"
+                        ></p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">
+                          per <span x-text="product.unit"></span>
+                        </p>
+                      </div>
+                      <button
+                        @click="addToCart(product)"
+                        class="rounded-lg bg-amber-600 px-6 py-2 text-sm font-medium text-white transition-colors hover:bg-amber-700"
+                      >
+                        Select Options
+                      </button>
+                    </div>
+                  </div>
+                </template>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <!-- ===== Footer ===== -->
+      <footer
+        class="mt-8 border-t border-gray-200 bg-white py-6 dark:border-gray-700 dark:bg-gray-800"
+      >
+        <div class="mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8">
+          <div
+            class="flex flex-col items-center justify-between gap-4 sm:flex-row"
+          >
+            <p class="text-sm text-gray-500 dark:text-gray-400">
+              © 2025 Purbeck Ice Cream. All rights reserved.
+            </p>
+            <div class="flex items-center gap-6 text-sm">
+              <a
+                href="#"
+                class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+                >Help & Support</a
+              >
+              <a
+                href="#"
+                class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+                >Terms & Conditions</a
+              >
+              <a
+                href="#"
+                class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+                >Privacy Policy</a
+              >
+            </div>
+          </div>
+        </div>
+      </footer>
+    </div>
+    <!-- ===== Page Container End ===== -->
+  </body>
+</html>

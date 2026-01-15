@@ -1,0 +1,795 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0"
+    />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>
+      Customer Configuration | Purbeck Ice Cream
+    </title>
+  </head>
+  <body
+    x-data="{ page: 'customerConfig', 'loaded': true, 'darkMode': false, 'stickyMenu': false, 'sidebarToggle': false, 'scrollTop': false }"
+    x-init="
+         darkMode = JSON.parse(localStorage.getItem('darkMode'));
+         $watch('darkMode', value => localStorage.setItem('darkMode', JSON.stringify(value)))"
+    :class="{'dark bg-gray-900': darkMode === true}"
+  >
+    <!-- ===== Preloader Start ===== -->
+    <include src="./partials/preloader.html"></include>
+    <!-- ===== Preloader End ===== -->
+
+    <!-- ===== Page Wrapper Start ===== -->
+    <div class="flex h-screen overflow-hidden">
+      <!-- ===== Sidebar Start ===== -->
+      <include src="./partials/sidebar.html"></include>
+      <!-- ===== Sidebar End ===== -->
+
+      <!-- ===== Content Area Start ===== -->
+      <div
+        class="relative flex flex-col flex-1 overflow-x-hidden overflow-y-auto"
+      >
+        <!-- Small Device Overlay Start -->
+        <include src="./partials/overlay.html" />
+        <!-- Small Device Overlay End -->
+
+        <!-- ===== Header Start ===== -->
+        <include src="./partials/header.html" />
+        <!-- ===== Header End ===== -->
+
+        <!-- ===== Main Content Start ===== -->
+        <main>
+          <div class="p-4 mx-auto max-w-(--breakpoint-2xl) md:p-6"
+            x-data="{
+              selectedCustomer: new URLSearchParams(window.location.search).get('name') || 'The Pig on the Beach',
+              syncing: false,
+              saving: false,
+              successMessage: '',
+              customers: [
+                { id: 'CUST001', name: 'The Pig on the Beach', type: 'active' },
+                { id: 'CUST002', name: 'Holme Farm Shop', type: 'active' },
+                { id: 'CUST003', name: 'Swanage Beach Cafe', type: 'active' },
+                { id: 'CUST004', name: 'Lulworth Cove Inn', type: 'active' },
+                { id: 'CUST005', name: 'Washingpool Farm Shop', type: 'active' }
+              ],
+
+              sageData: {
+                'The Pig on the Beach': {
+                  customerId: 'CUST001',
+                  companyName: 'The Pig on the Beach Ltd',
+                  tradingAs: 'The Pig on the Beach',
+                  address: 'Manor Road, Studland, BH19 3AU',
+                  contactName: 'James Morrison',
+                  contactEmail: 'orders@thepighotel.com',
+                  contactPhone: '01929 450288',
+                  creditLimit: 5000,
+                  currency: 'GBP',
+                  paymentTerms: '30 days',
+                  accountStatus: 'Active',
+                  lastSyncDate: '2025-01-20 09:30:00',
+                  totalOrders: 47,
+                  totalSpend: 8450
+                },
+                'Holme Farm Shop': {
+                  customerId: 'CUST002',
+                  companyName: 'Holme Farm Shop Ltd',
+                  tradingAs: 'Holme Farm Shop',
+                  address: 'Holme Lane, Wareham, BH20 6AQ',
+                  contactName: 'Sarah Williams',
+                  contactEmail: 'info@holmefarmshop.co.uk',
+                  contactPhone: '01929 456789',
+                  creditLimit: 3000,
+                  currency: 'GBP',
+                  paymentTerms: '14 days',
+                  accountStatus: 'Active',
+                  lastSyncDate: '2025-01-19 14:20:00',
+                  totalOrders: 89,
+                  totalSpend: 12340
+                },
+                'Swanage Beach Cafe': {
+                  customerId: 'CUST003',
+                  companyName: 'Swanage Beach Cafe Ltd',
+                  tradingAs: 'Swanage Beach Cafe',
+                  address: 'Shore Road, Swanage, BH19 1LB',
+                  contactName: 'Mike Thompson',
+                  contactEmail: 'hello@swanagebeachcafe.co.uk',
+                  contactPhone: '01929 423156',
+                  creditLimit: 8000,
+                  currency: 'GBP',
+                  paymentTerms: '7 days',
+                  accountStatus: 'Active',
+                  lastSyncDate: '2025-01-18 11:15:00',
+                  totalOrders: 156,
+                  totalSpend: 28900
+                }
+              },
+
+              dhConfig: {
+                'The Pig on the Beach': {
+                  costCenterEnabled: false,
+                  requirePO: false,
+                  approvalTier1Threshold: 500,
+                  approvalTier2Threshold: 2000,
+                  budgetExceededApproval: false,
+                  budgetPeriod: 'monthly',
+                  maxGrabsPerUser: 10,
+                  emailNotifications: true,
+                  autoReorderEnabled: false,
+                  customApprovalRules: 'Weekly delivery on Mondays',
+                  restrictToQuicklistOnly: false,
+                  restrictToContractOnly: false,
+                  restrictToPriceListOnly: false,
+                  maxProductPrice: 500,
+                  maxOrderAmount: 1000,
+                  allOrdersRequireApproval: false,
+                  preapproveQuicklist: true,
+                  preapproveContract: true,
+                  preventExceedBudget: false,
+                  showBudgetExceedMessage: true,
+                  enableExecutiveApproval: false,
+                  executiveApprovalThreshold: 5000,
+                  minimumOrderValue: 50
+                },
+                'Holme Farm Shop': {
+                  costCenterEnabled: false,
+                  requirePO: false,
+                  approvalTier1Threshold: 300,
+                  approvalTier2Threshold: 1000,
+                  budgetExceededApproval: false,
+                  budgetPeriod: 'monthly',
+                  maxGrabsPerUser: 15,
+                  emailNotifications: true,
+                  autoReorderEnabled: false,
+                  customApprovalRules: 'Retail focus - 125ml, 500ml, 2L tubs',
+                  restrictToQuicklistOnly: false,
+                  restrictToContractOnly: false,
+                  restrictToPriceListOnly: false,
+                  maxProductPrice: 300,
+                  maxOrderAmount: 800,
+                  allOrdersRequireApproval: false,
+                  preapproveQuicklist: true,
+                  preapproveContract: false,
+                  preventExceedBudget: false,
+                  showBudgetExceedMessage: true,
+                  enableExecutiveApproval: false,
+                  executiveApprovalThreshold: 2000,
+                  minimumOrderValue: 30
+                },
+                'Swanage Beach Cafe': {
+                  costCenterEnabled: false,
+                  requirePO: false,
+                  approvalTier1Threshold: 500,
+                  approvalTier2Threshold: 1500,
+                  budgetExceededApproval: false,
+                  budgetPeriod: 'weekly',
+                  maxGrabsPerUser: 20,
+                  emailNotifications: true,
+                  autoReorderEnabled: true,
+                  customApprovalRules: 'High volume scooping - 5L Napolis',
+                  restrictToQuicklistOnly: false,
+                  restrictToContractOnly: false,
+                  restrictToPriceListOnly: false,
+                  maxProductPrice: 500,
+                  maxOrderAmount: 1500,
+                  allOrdersRequireApproval: false,
+                  preapproveQuicklist: true,
+                  preapproveContract: true,
+                  preventExceedBudget: false,
+                  showBudgetExceedMessage: true,
+                  enableExecutiveApproval: false,
+                  executiveApprovalThreshold: 3000,
+                  minimumOrderValue: 50
+                }
+              },
+
+              orderHistory: {
+                'The Pig on the Beach': [
+                  { id: 'ORD-2025-0342', date: '20 Jan 2025', items: 8, total: 245.50, status: 'shipped' },
+                  { id: 'ORD-2025-0331', date: '08 Jan 2025', items: 10, total: 324.00, status: 'delivered' },
+                  { id: 'ORD-2025-0298', date: '18 Dec 2024', items: 6, total: 198.00, status: 'delivered' },
+                  { id: 'ORD-2025-0267', date: '02 Dec 2024', items: 8, total: 276.00, status: 'delivered' }
+                ],
+                'Holme Farm Shop': [
+                  { id: 'ORD-2025-0341', date: '19 Jan 2025', items: 12, total: 186.40, status: 'ordered' },
+                  { id: 'ORD-2025-0332', date: '10 Jan 2025', items: 18, total: 148.80, status: 'delivered' },
+                  { id: 'ORD-2025-0305', date: '22 Dec 2024', items: 14, total: 162.20, status: 'delivered' },
+                  { id: 'ORD-2025-0278', date: '08 Dec 2024', items: 16, total: 175.60, status: 'delivered' }
+                ],
+                'Swanage Beach Cafe': [
+                  { id: 'ORD-2025-0340', date: '18 Jan 2025', items: 6, total: 312.00, status: 'delivered' },
+                  { id: 'ORD-2025-0325', date: '04 Jan 2025', items: 8, total: 356.00, status: 'delivered' },
+                  { id: 'ORD-2025-0312', date: '28 Dec 2024', items: 6, total: 298.00, status: 'delivered' },
+                  { id: 'ORD-2025-0295', date: '14 Dec 2024', items: 10, total: 428.00, status: 'delivered' }
+                ]
+              },
+
+              get currentSageData() {
+                return this.sageData[this.selectedCustomer] || {};
+              },
+
+              get currentDHConfig() {
+                return this.dhConfig[this.selectedCustomer] || {};
+              },
+
+              get currentOrderHistory() {
+                return this.orderHistory[this.selectedCustomer] || [];
+              },
+
+              syncFromSage() {
+                this.syncing = true;
+                setTimeout(() => {
+                  this.syncing = false;
+                  this.sageData[this.selectedCustomer].lastSyncDate = new Date().toISOString().slice(0, 19).replace('T', ' ');
+                  this.showSuccess('Customer data synced from Sage successfully');
+                }, 1500);
+              },
+
+              saveConfiguration() {
+                this.saving = true;
+                setTimeout(() => {
+                  this.saving = false;
+                  this.showSuccess('Configuration saved successfully');
+                }, 1000);
+              },
+
+              showSuccess(message) {
+                this.successMessage = message;
+                setTimeout(() => {
+                  this.successMessage = '';
+                }, 3000);
+              },
+
+              formatCurrency(amount, currency = 'GBP') {
+                return currency === 'EUR' ? '€' + amount.toLocaleString() : '£' + amount.toLocaleString();
+              },
+
+              formatDate(dateStr) {
+                const date = new Date(dateStr);
+                const now = new Date();
+                const diff = Math.floor((now - date) / 60000); // minutes
+                if (diff < 1) return 'Just now';
+                if (diff < 60) return diff + ' mins ago';
+                if (diff < 1440) return Math.floor(diff / 60) + ' hours ago';
+                return date.toLocaleDateString();
+              }
+            }"
+          >
+            <!-- Success Message -->
+            <template x-if="successMessage">
+              <div class="fixed top-4 right-4 z-[99999] animate-fade-in">
+                <div class="flex items-center gap-3 p-4 bg-green-50 border border-green-200 rounded-lg shadow-lg dark:bg-green-900/20 dark:border-green-800">
+                  <svg class="w-5 h-5 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                  </svg>
+                  <p class="text-sm font-medium text-green-800 dark:text-green-200" x-text="successMessage"></p>
+                </div>
+              </div>
+            </template>
+
+            <!-- Header -->
+            <div class="flex items-center justify-between mb-6">
+              <div>
+                <h1 class="text-3xl font-bold text-gray-900 dark:text-white">
+                  Customer Configuration
+                </h1>
+                <p class="mt-2 text-gray-600 dark:text-gray-400">
+                  Manage customer settings and DataHub rules
+                </p>
+              </div>
+              <div class="flex items-center gap-3">
+                <button @click="syncFromSage()"
+                  :disabled="syncing"
+                  class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed dark:bg-blue-500 dark:hover:bg-blue-600">
+                  <template x-if="!syncing">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                    </svg>
+                  </template>
+                  <template x-if="syncing">
+                    <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                  </template>
+                  <span x-text="syncing ? 'Syncing...' : 'Sync from Sage'"></span>
+                </button>
+                <button @click="saveConfiguration()"
+                  :disabled="saving"
+                  class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed dark:bg-green-500 dark:hover:bg-green-600">
+                  <template x-if="!saving">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path>
+                    </svg>
+                  </template>
+                  <template x-if="saving">
+                    <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                  </template>
+                  <span x-text="saving ? 'Saving...' : 'Save Configuration'"></span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Customer Selector -->
+            <div class="p-4 mb-6 bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700">
+              <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                Select Customer
+              </label>
+              <select x-model="selectedCustomer"
+                class="w-full px-4 py-2 text-lg font-medium border border-gray-300 rounded-lg md:w-96 focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                <template x-for="customer in customers" :key="customer.id">
+                  <option :value="customer.name" x-text="customer.name + ' (' + customer.id + ')'"></option>
+                </template>
+              </select>
+            </div>
+
+            <!-- Two Column Layout -->
+            <div class="grid grid-cols-1 gap-6 mb-6 lg:grid-cols-2">
+              <!-- Left: Sage Customer Data (Read-Only) -->
+              <div class="bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700">
+                <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                      <svg class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                      </svg>
+                      <h2 class="text-xl font-bold text-gray-900 dark:text-white">
+                        Sage Customer Data
+                      </h2>
+                    </div>
+                    <span class="px-2 py-1 text-xs font-medium text-blue-700 bg-blue-100 rounded-full dark:bg-blue-900/30 dark:text-blue-400">
+                      READ-ONLY
+                    </span>
+                  </div>
+                  <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
+                    Synced from Sage ERP • Last sync: <span x-text="formatDate(currentSageData.lastSyncDate)"></span>
+                  </p>
+                </div>
+
+                <div class="p-6 space-y-4">
+                  <!-- Customer ID -->
+                  <div>
+                    <label class="block mb-1 text-xs font-medium text-gray-600 dark:text-gray-400">Customer ID</label>
+                    <p class="text-sm font-bold text-gray-900 dark:text-white" x-text="currentSageData.customerId"></p>
+                  </div>
+
+                  <!-- Company Name -->
+                  <div>
+                    <label class="block mb-1 text-xs font-medium text-gray-600 dark:text-gray-400">Company Name</label>
+                    <p class="text-sm font-bold text-gray-900 dark:text-white" x-text="currentSageData.companyName"></p>
+                  </div>
+
+                  <!-- Trading As -->
+                  <div>
+                    <label class="block mb-1 text-xs font-medium text-gray-600 dark:text-gray-400">Trading As</label>
+                    <p class="text-sm text-gray-900 dark:text-white" x-text="currentSageData.tradingAs"></p>
+                  </div>
+
+                  <!-- Address -->
+                  <div>
+                    <label class="block mb-1 text-xs font-medium text-gray-600 dark:text-gray-400">Address</label>
+                    <p class="text-sm text-gray-900 dark:text-white" x-text="currentSageData.address"></p>
+                  </div>
+
+                  <!-- Contact Details -->
+                  <div class="grid grid-cols-1 gap-4">
+                    <div>
+                      <label class="block mb-1 text-xs font-medium text-gray-600 dark:text-gray-400">Contact Name</label>
+                      <p class="text-sm text-gray-900 dark:text-white" x-text="currentSageData.contactName"></p>
+                    </div>
+                    <div>
+                      <label class="block mb-1 text-xs font-medium text-gray-600 dark:text-gray-400">Email</label>
+                      <p class="text-sm text-gray-900 dark:text-white" x-text="currentSageData.contactEmail"></p>
+                    </div>
+                    <div>
+                      <label class="block mb-1 text-xs font-medium text-gray-600 dark:text-gray-400">Phone</label>
+                      <p class="text-sm text-gray-900 dark:text-white" x-text="currentSageData.contactPhone"></p>
+                    </div>
+                  </div>
+
+                  <!-- Financial Info -->
+                  <div class="grid grid-cols-2 gap-4 p-4 border border-gray-200 rounded-lg dark:border-gray-700">
+                    <div>
+                      <label class="block mb-1 text-xs font-medium text-gray-600 dark:text-gray-400">Credit Limit</label>
+                      <p class="text-lg font-bold text-gray-900 dark:text-white" x-text="formatCurrency(currentSageData.creditLimit, currentSageData.currency)"></p>
+                    </div>
+                    <div>
+                      <label class="block mb-1 text-xs font-medium text-gray-600 dark:text-gray-400">Currency</label>
+                      <p class="text-lg font-bold text-gray-900 dark:text-white" x-text="currentSageData.currency"></p>
+                    </div>
+                    <div>
+                      <label class="block mb-1 text-xs font-medium text-gray-600 dark:text-gray-400">Payment Terms</label>
+                      <p class="text-sm text-gray-900 dark:text-white" x-text="currentSageData.paymentTerms"></p>
+                    </div>
+                    <div>
+                      <label class="block mb-1 text-xs font-medium text-gray-600 dark:text-gray-400">Account Status</label>
+                      <span class="inline-flex px-2 py-1 text-xs font-medium text-green-700 bg-green-100 rounded-full dark:bg-green-900/30 dark:text-green-400">
+                        <span x-text="currentSageData.accountStatus"></span>
+                      </span>
+                    </div>
+                  </div>
+
+                  <!-- Order Stats -->
+                  <div class="grid grid-cols-2 gap-4 p-4 border border-gray-200 rounded-lg dark:border-gray-700">
+                    <div>
+                      <label class="block mb-1 text-xs font-medium text-gray-600 dark:text-gray-400">Total Orders</label>
+                      <p class="text-lg font-bold text-gray-900 dark:text-white" x-text="currentSageData.totalOrders.toLocaleString()"></p>
+                    </div>
+                    <div>
+                      <label class="block mb-1 text-xs font-medium text-gray-600 dark:text-gray-400">Total Spend</label>
+                      <p class="text-lg font-bold text-gray-900 dark:text-white" x-text="formatCurrency(currentSageData.totalSpend, currentSageData.currency)"></p>
+                    </div>
+                  </div>
+
+                  <!-- Warning Box -->
+                  <div class="p-4 border-l-4 border-blue-500 rounded-lg bg-blue-50 dark:bg-blue-900/20">
+                    <div class="flex items-start gap-3">
+                      <svg class="w-5 h-5 mt-0.5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                      </svg>
+                      <div>
+                        <p class="text-sm font-medium text-blue-800 dark:text-blue-300">
+                          To modify Sage data, make changes in Sage ERP and sync
+                        </p>
+                        <p class="mt-1 text-xs text-blue-700 dark:text-blue-400">
+                          This data is read-only to maintain data integrity
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Right: DataHub Configuration (Editable) -->
+              <div class="bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700">
+                <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                      <svg class="w-6 h-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                      </svg>
+                      <h2 class="text-xl font-bold text-gray-900 dark:text-white">
+                        DataHub Configuration
+                      </h2>
+                    </div>
+                    <span class="px-2 py-1 text-xs font-medium text-green-700 bg-green-100 rounded-full dark:bg-green-900/30 dark:text-green-400">
+                      EDITABLE
+                    </span>
+                  </div>
+                  <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
+                    Business logic overlay rules
+                  </p>
+                </div>
+
+                <div class="p-6 space-y-4">
+                  <!-- Cost Center Tracking -->
+                  <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg dark:border-gray-700">
+                    <div>
+                      <p class="font-medium text-gray-900 dark:text-white">Enable Cost Center Tracking</p>
+                      <p class="text-xs text-gray-600 dark:text-gray-400">Track spending by cost center</p>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                      <input type="checkbox" x-model="currentDHConfig.costCenterEnabled" class="sr-only peer">
+                      <div class="w-11 h-6 bg-gray-200 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-green-600"></div>
+                    </label>
+                  </div>
+
+                  <!-- Require PO Numbers -->
+                  <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg dark:border-gray-700">
+                    <div>
+                      <p class="font-medium text-gray-900 dark:text-white">Require PO Numbers</p>
+                      <p class="text-xs text-gray-600 dark:text-gray-400">Mandatory PO for all orders</p>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                      <input type="checkbox" x-model="currentDHConfig.requirePO" class="sr-only peer">
+                      <div class="w-11 h-6 bg-gray-200 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-green-600"></div>
+                    </label>
+                  </div>
+
+                  <!-- Approval Thresholds -->
+                  <div class="p-4 space-y-3 border border-gray-200 rounded-lg dark:border-gray-700">
+                    <p class="font-medium text-gray-900 dark:text-white">Approval Thresholds</p>
+                    <div>
+                      <label class="block mb-1 text-xs font-medium text-gray-600 dark:text-gray-400">Tier 1 Approval (£)</label>
+                      <input type="number" x-model="currentDHConfig.approvalTier1Threshold"
+                        class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                    </div>
+                    <div>
+                      <label class="block mb-1 text-xs font-medium text-gray-600 dark:text-gray-400">Tier 2 Approval (£)</label>
+                      <input type="number" x-model="currentDHConfig.approvalTier2Threshold"
+                        class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                    </div>
+                  </div>
+
+                  <!-- Budget Settings -->
+                  <div class="p-4 space-y-3 border border-gray-200 rounded-lg dark:border-gray-700">
+                    <p class="font-medium text-gray-900 dark:text-white">Budget Settings</p>
+                    <div>
+                      <label class="block mb-1 text-xs font-medium text-gray-600 dark:text-gray-400">Budget Period</label>
+                      <select x-model="currentDHConfig.budgetPeriod"
+                        class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                        <option value="monthly">Monthly</option>
+                        <option value="quarterly">Quarterly</option>
+                        <option value="annual">Annual</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label class="block mb-1 text-xs font-medium text-gray-600 dark:text-gray-400">Max Orders Per User (per period)</label>
+                      <input type="number" x-model="currentDHConfig.maxGrabsPerUser"
+                        class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                    </div>
+                  </div>
+
+                  <!-- Additional Toggles -->
+                  <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg dark:border-gray-700">
+                    <div>
+                      <p class="font-medium text-gray-900 dark:text-white">Budget Exceeded Approval</p>
+                      <p class="text-xs text-gray-600 dark:text-gray-400">Require approval when budget exceeded</p>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                      <input type="checkbox" x-model="currentDHConfig.budgetExceededApproval" class="sr-only peer">
+                      <div class="w-11 h-6 bg-gray-200 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-green-600"></div>
+                    </label>
+                  </div>
+
+                  <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg dark:border-gray-700">
+                    <div>
+                      <p class="font-medium text-gray-900 dark:text-white">Email Notifications</p>
+                      <p class="text-xs text-gray-600 dark:text-gray-400">Send approval/order notifications</p>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                      <input type="checkbox" x-model="currentDHConfig.emailNotifications" class="sr-only peer">
+                      <div class="w-11 h-6 bg-gray-200 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-green-600"></div>
+                    </label>
+                  </div>
+
+                  <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg dark:border-gray-700">
+                    <div>
+                      <p class="font-medium text-gray-900 dark:text-white">Auto-Reorder</p>
+                      <p class="text-xs text-gray-600 dark:text-gray-400">Automatic reordering for stock items</p>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                      <input type="checkbox" x-model="currentDHConfig.autoReorderEnabled" class="sr-only peer">
+                      <div class="w-11 h-6 bg-gray-200 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-green-600"></div>
+                    </label>
+                  </div>
+
+                  <!-- Custom Rules -->
+                  <div>
+                    <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Custom Approval Rules</label>
+                    <textarea x-model="currentDHConfig.customApprovalRules"
+                      rows="3"
+                      class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                      placeholder="Enter any custom approval rules or notes..."></textarea>
+                  </div>
+
+                  <!-- NEW: Product Visibility Restrictions -->
+                  <div class="p-4 space-y-3 border-2 border-orange-300 rounded-lg dark:border-orange-800 bg-orange-50 dark:bg-orange-900/10">
+                    <div class="flex items-center gap-2 mb-2">
+                      <svg class="w-5 h-5 text-orange-600 dark:text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                      </svg>
+                      <p class="font-semibold text-gray-900 dark:text-white">Product Visibility Restrictions</p>
+                    </div>
+
+                    <div class="flex items-center justify-between p-3 border border-orange-200 rounded-lg dark:border-orange-800 bg-white dark:bg-gray-800">
+                      <div>
+                        <p class="text-sm font-medium text-gray-900 dark:text-white">Restrict to Quicklist Only</p>
+                        <p class="text-xs text-gray-600 dark:text-gray-400">Users can only see quicklist products</p>
+                      </div>
+                      <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" x-model="currentDHConfig.restrictToQuicklistOnly" class="sr-only peer">
+                        <div class="w-11 h-6 bg-gray-200 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-orange-600"></div>
+                      </label>
+                    </div>
+
+                    <div class="flex items-center justify-between p-3 border border-orange-200 rounded-lg dark:border-orange-800 bg-white dark:bg-gray-800">
+                      <div>
+                        <p class="text-sm font-medium text-gray-900 dark:text-white">Restrict to Contract Only</p>
+                        <p class="text-xs text-gray-600 dark:text-gray-400">Users can only see contract products</p>
+                      </div>
+                      <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" x-model="currentDHConfig.restrictToContractOnly" class="sr-only peer">
+                        <div class="w-11 h-6 bg-gray-200 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-orange-600"></div>
+                      </label>
+                    </div>
+
+                    <div class="flex items-center justify-between p-3 border border-orange-200 rounded-lg dark:border-orange-800 bg-white dark:bg-gray-800">
+                      <div>
+                        <p class="text-sm font-medium text-gray-900 dark:text-white">Restrict to Price List Only</p>
+                        <p class="text-xs text-gray-600 dark:text-gray-400">Users can only see price list products</p>
+                      </div>
+                      <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" x-model="currentDHConfig.restrictToPriceListOnly" class="sr-only peer">
+                        <div class="w-11 h-6 bg-gray-200 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-orange-600"></div>
+                      </label>
+                    </div>
+                  </div>
+
+                  <!-- NEW: Order Value Limits -->
+                  <div class="p-4 space-y-3 border-2 border-purple-300 rounded-lg dark:border-purple-800 bg-purple-50 dark:bg-purple-900/10">
+                    <div class="flex items-center gap-2 mb-2">
+                      <svg class="w-5 h-5 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                      </svg>
+                      <p class="font-semibold text-gray-900 dark:text-white">Order Value Limits</p>
+                    </div>
+
+                    <div>
+                      <label class="block mb-1 text-xs font-medium text-gray-600 dark:text-gray-400">Minimum Order Value (£)</label>
+                      <input type="number" x-model="currentDHConfig.minimumOrderValue" min="0" step="1"
+                        class="w-full px-3 py-2 text-sm border border-purple-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent dark:bg-gray-700 dark:border-purple-600 dark:text-white">
+                    </div>
+
+                    <div>
+                      <label class="block mb-1 text-xs font-medium text-gray-600 dark:text-gray-400">Maximum Product Price (£)</label>
+                      <input type="number" x-model="currentDHConfig.maxProductPrice" min="0" step="1"
+                        class="w-full px-3 py-2 text-sm border border-purple-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent dark:bg-gray-700 dark:border-purple-600 dark:text-white">
+                      <p class="mt-1 text-xs text-gray-600 dark:text-gray-400">Set to 0 for unlimited</p>
+                    </div>
+
+                    <div>
+                      <label class="block mb-1 text-xs font-medium text-gray-600 dark:text-gray-400">Maximum Order Amount (£)</label>
+                      <input type="number" x-model="currentDHConfig.maxOrderAmount" min="0" step="1"
+                        class="w-full px-3 py-2 text-sm border border-purple-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent dark:bg-gray-700 dark:border-purple-600 dark:text-white">
+                      <p class="mt-1 text-xs text-gray-600 dark:text-gray-400">Set to 0 for unlimited</p>
+                    </div>
+                  </div>
+
+                  <!-- NEW: Advanced Approval Settings -->
+                  <div class="p-4 space-y-3 border-2 border-red-300 rounded-lg dark:border-red-800 bg-red-50 dark:bg-red-900/10">
+                    <div class="flex items-center gap-2 mb-2">
+                      <svg class="w-5 h-5 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                      </svg>
+                      <p class="font-semibold text-gray-900 dark:text-white">Advanced Approval Settings</p>
+                    </div>
+
+                    <div class="flex items-center justify-between p-3 border border-red-200 rounded-lg dark:border-red-800 bg-white dark:bg-gray-800">
+                      <div>
+                        <p class="text-sm font-medium text-gray-900 dark:text-white">All Orders Require Approval</p>
+                        <p class="text-xs text-gray-600 dark:text-gray-400">Every order needs manual approval</p>
+                      </div>
+                      <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" x-model="currentDHConfig.allOrdersRequireApproval" class="sr-only peer">
+                        <div class="w-11 h-6 bg-gray-200 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-red-600"></div>
+                      </label>
+                    </div>
+
+                    <div class="flex items-center justify-between p-3 border border-red-200 rounded-lg dark:border-red-800 bg-white dark:bg-gray-800">
+                      <div>
+                        <p class="text-sm font-medium text-gray-900 dark:text-white">Preapprove Quicklist Items</p>
+                        <p class="text-xs text-gray-600 dark:text-gray-400">Auto-approve quicklist orders</p>
+                      </div>
+                      <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" x-model="currentDHConfig.preapproveQuicklist" class="sr-only peer">
+                        <div class="w-11 h-6 bg-gray-200 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-red-600"></div>
+                      </label>
+                    </div>
+
+                    <div class="flex items-center justify-between p-3 border border-red-200 rounded-lg dark:border-red-800 bg-white dark:bg-gray-800">
+                      <div>
+                        <p class="text-sm font-medium text-gray-900 dark:text-white">Preapprove Contract Items</p>
+                        <p class="text-xs text-gray-600 dark:text-gray-400">Auto-approve contract orders</p>
+                      </div>
+                      <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" x-model="currentDHConfig.preapproveContract" class="sr-only peer">
+                        <div class="w-11 h-6 bg-gray-200 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-red-600"></div>
+                      </label>
+                    </div>
+
+                    <div class="flex items-center justify-between p-3 border border-red-200 rounded-lg dark:border-red-800 bg-white dark:bg-gray-800">
+                      <div>
+                        <p class="text-sm font-medium text-gray-900 dark:text-white">Prevent Budget Exceedance</p>
+                        <p class="text-xs text-gray-600 dark:text-gray-400">Block orders that exceed budget</p>
+                      </div>
+                      <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" x-model="currentDHConfig.preventExceedBudget" class="sr-only peer">
+                        <div class="w-11 h-6 bg-gray-200 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-red-600"></div>
+                      </label>
+                    </div>
+
+                    <div class="flex items-center justify-between p-3 border border-red-200 rounded-lg dark:border-red-800 bg-white dark:bg-gray-800">
+                      <div>
+                        <p class="text-sm font-medium text-gray-900 dark:text-white">Show Budget Exceed Message</p>
+                        <p class="text-xs text-gray-600 dark:text-gray-400">Warn users about budget limits</p>
+                      </div>
+                      <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" x-model="currentDHConfig.showBudgetExceedMessage" class="sr-only peer">
+                        <div class="w-11 h-6 bg-gray-200 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-red-600"></div>
+                      </label>
+                    </div>
+
+                    <div class="flex items-center justify-between p-3 border border-red-200 rounded-lg dark:border-red-800 bg-white dark:bg-gray-800">
+                      <div>
+                        <p class="text-sm font-medium text-gray-900 dark:text-white">Enable Executive Approval</p>
+                        <p class="text-xs text-gray-600 dark:text-gray-400">Require exec approval for high-value orders</p>
+                      </div>
+                      <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" x-model="currentDHConfig.enableExecutiveApproval" class="sr-only peer">
+                        <div class="w-11 h-6 bg-gray-200 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-red-600"></div>
+                      </label>
+                    </div>
+
+                    <div x-show="currentDHConfig.enableExecutiveApproval">
+                      <label class="block mb-1 text-xs font-medium text-gray-600 dark:text-gray-400">Executive Approval Threshold (£)</label>
+                      <input type="number" x-model="currentDHConfig.executiveApprovalThreshold" min="0" step="1000"
+                        class="w-full px-3 py-2 text-sm border border-red-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent dark:bg-gray-700 dark:border-red-600 dark:text-white">
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Order History Table -->
+            <div class="bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700">
+              <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+                <div class="flex items-center justify-between">
+                  <div>
+                    <h2 class="text-xl font-bold text-gray-900 dark:text-white">
+                      Order History
+                    </h2>
+                    <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
+                      Recent orders for <span x-text="selectedCustomer"></span>
+                    </p>
+                  </div>
+                  <a href="orders-panel.html" class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400">
+                    View All Orders
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                  </a>
+                </div>
+              </div>
+
+              <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                  <thead class="bg-gray-50 dark:bg-gray-900">
+                    <tr>
+                      <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-700 uppercase dark:text-gray-300">Order ID</th>
+                      <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-700 uppercase dark:text-gray-300">Date</th>
+                      <th class="px-6 py-3 text-xs font-medium tracking-wider text-right text-gray-700 uppercase dark:text-gray-300">Items</th>
+                      <th class="px-6 py-3 text-xs font-medium tracking-wider text-right text-gray-700 uppercase dark:text-gray-300">Total</th>
+                      <th class="px-6 py-3 text-xs font-medium tracking-wider text-center text-gray-700 uppercase dark:text-gray-300">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody class="bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700">
+                    <template x-for="order in currentOrderHistory" :key="order.id">
+                      <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
+                        <td class="px-6 py-4 text-sm font-medium text-gray-900 dark:text-white" x-text="order.id"></td>
+                        <td class="px-6 py-4 text-sm text-gray-900 dark:text-white" x-text="order.date"></td>
+                        <td class="px-6 py-4 text-sm text-right text-gray-900 dark:text-white" x-text="order.items"></td>
+                        <td class="px-6 py-4 text-sm text-right font-medium text-gray-900 dark:text-white" x-text="formatCurrency(order.total, 'GBP')"></td>
+                        <td class="px-6 py-4 text-center">
+                          <span class="px-2 py-1 text-xs font-medium rounded-full"
+                            :class="{
+                              'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400': order.status === 'ordered',
+                              'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400': order.status === 'shipped',
+                              'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400': order.status === 'delivered'
+                            }"
+                            x-text="order.status.charAt(0).toUpperCase() + order.status.slice(1)">
+                          </span>
+                        </td>
+                      </tr>
+                    </template>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+          </div>
+        </main>
+        <!-- ===== Main Content End ===== -->
+      </div>
+      <!-- ===== Content Area End ===== -->
+    </div>
+    <!-- ===== Page Wrapper End ===== -->
+  </body>
+</html>

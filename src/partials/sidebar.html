@@ -1,0 +1,223 @@
+<aside
+  :class="sidebarToggle ? 'translate-x-0 lg:w-[90px]' : '-translate-x-full'"
+  class="sidebar fixed left-0 top-0 z-9999 flex h-screen w-[290px] flex-col overflow-y-hidden border-r border-gray-200 bg-white px-5 dark:border-gray-800 dark:bg-black lg:static lg:translate-x-0"
+>
+  <!-- SIDEBAR HEADER -->
+  <div
+    :class="sidebarToggle ? 'justify-center' : 'justify-between'"
+    class="flex items-center gap-2 pt-8 sidebar-header pb-7"
+  >
+    <a href="index.html">
+      <span class="logo" :class="sidebarToggle ? 'hidden' : ''">
+        <img class="w-[200px] h-auto" src="./images/purbeck_logo.png" alt="Purbeck Ice Cream" />
+      </span>
+
+      <img
+        class="logo-icon w-[200px] h-auto"
+        :class="sidebarToggle ? 'lg:block' : 'hidden'"
+        src="./images/purbeck_logo.png"
+        alt="Purbeck Ice Cream"
+      />
+    </a>
+  </div>
+  <!-- SIDEBAR HEADER -->
+
+  <div
+    class="flex flex-col overflow-y-auto duration-300 ease-linear no-scrollbar"
+  >
+    <!-- Sidebar Menu -->
+    <nav x-data="{selected: $persist('Home')}">
+      <!-- Menu Group -->
+      <div>
+        <h3 class="mb-4 text-xs uppercase leading-[20px] text-gray-400">
+          <span
+            class="menu-group-title"
+            :class="sidebarToggle ? 'lg:hidden' : ''"
+          >
+            MENU
+          </span>
+
+          <svg
+            :class="sidebarToggle ? 'lg:block hidden' : 'hidden'"
+            class="mx-auto fill-current menu-group-icon"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              fill-rule="evenodd"
+              clip-rule="evenodd"
+              d="M5.99915 10.2451C6.96564 10.2451 7.74915 11.0286 7.74915 11.9951V12.0051C7.74915 12.9716 6.96564 13.7551 5.99915 13.7551C5.03265 13.7551 4.24915 12.9716 4.24915 12.0051V11.9951C4.24915 11.0286 5.03265 10.2451 5.99915 10.2451ZM17.9991 10.2451C18.9656 10.2451 19.7491 11.0286 19.7491 11.9951V12.0051C19.7491 12.9716 18.9656 13.7551 17.9991 13.7551C17.0326 13.7551 16.2491 12.9716 16.2491 12.0051V11.9951C16.2491 11.0286 17.0326 10.2451 17.9991 10.2451ZM13.7491 11.9951C13.7491 11.0286 12.9656 10.2451 11.9991 10.2451C11.0326 10.2451 10.2491 11.0286 10.2491 11.9951V12.0051C10.2491 12.9716 11.0326 13.7551 11.9991 13.7551C12.9656 13.7551 13.7491 12.9716 13.7491 12.0051V11.9951Z"
+              fill=""
+            />
+          </svg>
+        </h3>
+
+        <ul class="flex flex-col gap-4 mb-6">
+          <!-- Menu Item Home -->
+          <li>
+            <a
+              href="index.html"
+              @click="selected = (selected === 'Home' ? '':'Home')"
+              class="menu-item group"
+              :class=" (selected === 'Home') && (page === 'ecommerce') ? 'menu-item-active' : 'menu-item-inactive'"
+            >
+              <svg
+                :class="(selected === 'Home') && (page === 'ecommerce') ? 'menu-item-icon-active'  :'menu-item-icon-inactive'"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  fill-rule="evenodd"
+                  clip-rule="evenodd"
+                  d="M5.5 3.25C4.25736 3.25 3.25 4.25736 3.25 5.5V8.99998C3.25 10.2426 4.25736 11.25 5.5 11.25H9C10.2426 11.25 11.25 10.2426 11.25 8.99998V5.5C11.25 4.25736 10.2426 3.25 9 3.25H5.5ZM4.75 5.5C4.75 5.08579 5.08579 4.75 5.5 4.75H9C9.41421 4.75 9.75 5.08579 9.75 5.5V8.99998C9.75 9.41419 9.41421 9.74998 9 9.74998H5.5C5.08579 9.74998 4.75 9.41419 4.75 8.99998V5.5ZM5.5 12.75C4.25736 12.75 3.25 13.7574 3.25 15V18.5C3.25 19.7426 4.25736 20.75 5.5 20.75H9C10.2426 20.75 11.25 19.7427 11.25 18.5V15C11.25 13.7574 10.2426 12.75 9 12.75H5.5ZM4.75 15C4.75 14.5858 5.08579 14.25 5.5 14.25H9C9.41421 14.25 9.75 14.5858 9.75 15V18.5C9.75 18.9142 9.41421 19.25 9 19.25H5.5C5.08579 19.25 4.75 18.9142 4.75 18.5V15ZM12.75 5.5C12.75 4.25736 13.7574 3.25 15 3.25H18.5C19.7426 3.25 20.75 4.25736 20.75 5.5V8.99998C20.75 10.2426 19.7426 11.25 18.5 11.25H15C13.7574 11.25 12.75 10.2426 12.75 8.99998V5.5ZM15 4.75C14.5858 4.75 14.25 5.08579 14.25 5.5V8.99998C14.25 9.41419 14.5858 9.74998 15 9.74998H18.5C18.9142 9.74998 19.25 9.41419 19.25 8.99998V5.5C19.25 5.08579 18.9142 4.75 18.5 4.75H15ZM15 12.75C13.7574 12.75 12.75 13.7574 12.75 15V18.5C12.75 19.7426 13.7574 20.75 15 20.75H18.5C19.7426 20.75 20.75 19.7427 20.75 18.5V15C20.75 13.7574 19.7426 12.75 18.5 12.75H15ZM14.25 15C14.25 14.5858 14.5858 14.25 15 14.25H18.5C18.9142 14.25 19.25 14.5858 19.25 15V18.5C19.25 18.9142 18.9142 19.25 18.5 19.25H15C14.5858 19.25 14.25 18.9142 14.25 18.5V15Z"
+                  fill=""
+                />
+              </svg>
+
+              <span
+                class="menu-item-text"
+                :class="sidebarToggle ? 'lg:hidden' : ''"
+              >
+                Home
+              </span>
+            </a>
+          </li>
+          <!-- Menu Item Home -->
+
+
+          <!-- Menu Item Orders Panel -->
+          <li>
+            <a
+              href="orders-panel.html"
+              @click="selected = (selected === 'OrdersPanel' ? '':'OrdersPanel')"
+              class="menu-item group"
+              :class=" (selected === 'OrdersPanel') && (page === 'ordersPanel') ? 'menu-item-active' : 'menu-item-inactive'"
+            >
+              <svg
+                :class="(selected === 'OrdersPanel') && (page === 'ordersPanel') ?  'menu-item-icon-active'  :'menu-item-icon-inactive'"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  fill-rule="evenodd"
+                  clip-rule="evenodd"
+                  d="M5.5 3.25C4.25736 3.25 3.25 4.25736 3.25 5.5V18.5C3.25 19.7426 4.25736 20.75 5.5 20.75H18.5C19.7426 20.75 20.75 19.7426 20.75 18.5V5.5C20.75 4.25736 19.7426 3.25 18.5 3.25H5.5ZM4.75 5.5C4.75 5.08579 5.08579 4.75 5.5 4.75H18.5C18.9142 4.75 19.25 5.08579 19.25 5.5V8.58325L4.75 8.58325V5.5ZM4.75 10.0833L8.58301 10.0833V13.9165H4.75V10.0833ZM10.083 10.0833L13.916 10.0833V13.9165L10.083 13.9165V10.0833ZM15.416 10.0833H19.25V13.9165H15.416V10.0833ZM4.75 15.4165H8.58301V19.25H5.5C5.08579 19.25 4.75 18.9142 4.75 18.5V15.4165ZM10.083 19.25V15.4165L13.916 15.4165V19.25H10.083ZM15.416 19.25V15.4165H19.25V18.5C19.25 18.9142 18.9142 19.25 18.5 19.25H15.416Z"
+                  fill=""
+                />
+              </svg>
+
+              <span
+                class="menu-item-text"
+                :class="sidebarToggle ? 'lg:hidden' : ''"
+              >
+                Orders
+              </span>
+            </a>
+          </li>
+          <!-- Menu Item Orders Panel -->
+
+          <!-- Menu Item User Management -->
+          <li>
+            <a
+              href="user-management.html"
+              @click="selected = (selected === 'UserManagement' ? '':'UserManagement')"
+              class="menu-item group"
+              :class=" (selected === 'UserManagement') && (page === 'userManagement') ? 'menu-item-active' : 'menu-item-inactive'"
+            >
+              <svg
+                :class="(selected === 'UserManagement') && (page === 'userManagement') ?  'menu-item-icon-active'  :'menu-item-icon-inactive'"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  fill-rule="evenodd"
+                  clip-rule="evenodd"
+                  d="M17 10.5C17 12.9853 14.9853 15 12.5 15C10.0147 15 8 12.9853 8 10.5C8 8.01472 10.0147 6 12.5 6C14.9853 6 17 8.01472 17 10.5ZM15 10.5C15 11.8807 13.8807 13 12.5 13C11.1193 13 10 11.8807 10 10.5C10 9.11929 11.1193 8 12.5 8C13.8807 8 15 9.11929 15 10.5Z"
+                  fill=""
+                />
+                <path
+                  fill-rule="evenodd"
+                  clip-rule="evenodd"
+                  d="M5 21C5 17.134 8.13401 14 12 14C15.866 14 19 17.134 19 21V22H17V21C17 18.2386 14.7614 16 12 16C9.23858 16 7 18.2386 7 21V22H5V21Z"
+                  fill=""
+                />
+                <path
+                  d="M18 7C18.5523 7 19 7.44772 19 8C19 8.55228 18.5523 9 18 9C17.4477 9 17 8.55228 17 8C17 7.44772 17.4477 7 18 7Z"
+                  fill=""
+                />
+                <path
+                  d="M22 13V14H20.5C20.2239 14 20 14.2239 20 14.5V16H19V14.5C19 13.6716 19.6716 13 20.5 13H22Z"
+                  fill=""
+                />
+                <path
+                  d="M6 7C6.55228 7 7 7.44772 7 8C7 8.55228 6.55228 9 6 9C5.44772 9 5 8.55228 5 8C5 7.44772 5.44772 7 6 7Z"
+                  fill=""
+                />
+                <path
+                  d="M2 13V14H3.5C3.77614 14 4 14.2239 4 14.5V16H5V14.5C5 13.6716 4.32843 13 3.5 13H2Z"
+                  fill=""
+                />
+              </svg>
+
+              <span
+                class="menu-item-text"
+                :class="sidebarToggle ? 'lg:hidden' : ''"
+              >
+                Customers
+              </span>
+            </a>
+          </li>
+          <!-- Menu Item Customers -->
+
+          <!-- Menu Item Product Management -->
+          <li>
+            <a
+              href="product-management.html"
+              @click="selected = (selected === 'ProductManagement' ? '':'ProductManagement')"
+              class="menu-item group"
+              :class=" (selected === 'ProductManagement') && (page === 'productManagement') ? 'menu-item-active' : 'menu-item-inactive'"
+            >
+              <svg
+                :class="(selected === 'ProductManagement') && (page === 'productManagement') ?  'menu-item-icon-active'  :'menu-item-icon-inactive'"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  fill-rule="evenodd"
+                  clip-rule="evenodd"
+                  d="M7.5 3.25C7.08579 3.25 6.75 3.58579 6.75 4V4.75H5.5C4.25736 4.75 3.25 5.75736 3.25 7V18.5C3.25 19.7426 4.25736 20.75 5.5 20.75H18.5C19.7426 20.75 20.75 19.7426 20.75 18.5V7C20.75 5.75736 19.7426 4.75 18.5 4.75H17.25V4C17.25 3.58579 16.9142 3.25 16.5 3.25C16.0858 3.25 15.75 3.58579 15.75 4V4.75H8.25V4C8.25 3.58579 7.91421 3.25 7.5 3.25ZM4.75 9.5V18.5C4.75 18.9142 5.08579 19.25 5.5 19.25H18.5C18.9142 19.25 19.25 18.9142 19.25 18.5V9.5H4.75ZM19.25 8H4.75V7C4.75 6.58579 5.08579 6.25 5.5 6.25H6.75V7C6.75 7.41421 7.08579 7.75 7.5 7.75C7.91421 7.75 8.25 7.41421 8.25 7V6.25H15.75V7C15.75 7.41421 16.0858 7.75 16.5 7.75C16.9142 7.75 17.25 7.41421 17.25 7V6.25H18.5C18.9142 6.25 19.25 6.58579 19.25 7V8Z"
+                  fill=""
+                />
+              </svg>
+
+              <span
+                class="menu-item-text"
+                :class="sidebarToggle ? 'lg:hidden' : ''"
+              >
+                Products
+              </span>
+            </a>
+          </li>
+          <!-- Menu Item Product Management -->
+        </ul>
+      </div>
+    </nav>
+    <!-- Sidebar Menu -->
+
+  </div>
+</aside>

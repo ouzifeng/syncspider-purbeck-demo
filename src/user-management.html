@@ -1,0 +1,780 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0"
+    />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Customers | Purbeck Ice Cream B2B Portal</title>
+  </head>
+  <body
+    x-data="{ page: 'userManagement', 'loaded': true, 'darkMode': false, 'stickyMenu': false, 'sidebarToggle': false, 'scrollTop': false }"
+    x-init="
+         darkMode = JSON.parse(localStorage.getItem('darkMode'));
+         $watch('darkMode', value => localStorage.setItem('darkMode', JSON.stringify(value)))"
+    :class="{'dark bg-gray-900': darkMode === true}"
+  >
+    <!-- ===== Preloader Start ===== -->
+    <include src="./partials/preloader.html"></include>
+    <!-- ===== Preloader End ===== -->
+
+    <!-- ===== Page Wrapper Start ===== -->
+    <div class="flex h-screen overflow-hidden">
+      <!-- ===== Sidebar Start ===== -->
+      <include src="./partials/sidebar.html"></include>
+      <!-- ===== Sidebar End ===== -->
+
+      <!-- ===== Content Area Start ===== -->
+      <div
+        class="relative flex flex-col flex-1 overflow-x-hidden overflow-y-auto"
+      >
+        <!-- Small Device Overlay Start -->
+        <include src="./partials/overlay.html" />
+        <!-- Small Device Overlay End -->
+
+        <!-- ===== Header Start ===== -->
+        <include src="./partials/header.html" />
+        <!-- ===== Header End ===== -->
+
+        <!-- ===== Main Content Start ===== -->
+        <main>
+          <div class="p-4 mx-auto max-w-screen-2xl md:p-6 2xl:p-10">
+            <!-- Customers Component -->
+            <div
+              x-data="{
+                // State
+                customers: [
+                  {
+                    id: 'CUST001',
+                    name: 'The Pig on the Beach',
+                    type: 'Restaurant',
+                    contact: 'James Morrison',
+                    email: 'orders@thepighotel.com',
+                    phone: '01929 450288',
+                    address: 'Manor Road, Studland, BH19 3AU',
+                    status: 'active',
+                    lastOrder: '2025-01-20',
+                    totalOrders: 47,
+                    totalSpend: 8450.00,
+                    paymentTerms: '30 days',
+                    notes: 'Premium hotel restaurant. Weekly deliveries on Mondays.'
+                  },
+                  {
+                    id: 'CUST002',
+                    name: 'Holme Farm Shop',
+                    type: 'Farm Shop',
+                    contact: 'Sarah Williams',
+                    email: 'info@holmefarmshop.co.uk',
+                    phone: '01929 456789',
+                    address: 'Holme Lane, Wareham, BH20 6AQ',
+                    status: 'active',
+                    lastOrder: '2025-01-19',
+                    totalOrders: 89,
+                    totalSpend: 12340.50,
+                    paymentTerms: '14 days',
+                    notes: 'Retail focus - needs 125ml, 500ml and 2L tubs. Good sorbet sales.'
+                  },
+                  {
+                    id: 'CUST003',
+                    name: 'Swanage Beach Cafe',
+                    type: 'Scooping Parlour',
+                    contact: 'Mike Thompson',
+                    email: 'hello@swanagebeachcafe.co.uk',
+                    phone: '01929 423156',
+                    address: 'Shore Road, Swanage, BH19 1LB',
+                    status: 'active',
+                    lastOrder: '2025-01-18',
+                    totalOrders: 156,
+                    totalSpend: 28900.00,
+                    paymentTerms: '7 days',
+                    notes: 'High volume scooping. 5L Napolis main order. Seasonal peaks in summer.'
+                  },
+                  {
+                    id: 'CUST004',
+                    name: 'Lulworth Cove Inn',
+                    type: 'Pub',
+                    contact: 'Emma Davis',
+                    email: 'manager@lulworthcoveinn.co.uk',
+                    phone: '01929 400333',
+                    address: 'Main Road, West Lulworth, BH20 5RQ',
+                    status: 'active',
+                    lastOrder: '2025-01-17',
+                    totalOrders: 34,
+                    totalSpend: 5120.00,
+                    paymentTerms: '30 days',
+                    notes: 'Dessert menu focus. Likes Clotted Cream and Salted Caramel.'
+                  },
+                  {
+                    id: 'CUST005',
+                    name: 'Washingpool Farm Shop',
+                    type: 'Farm Shop',
+                    contact: 'Tom Reynolds',
+                    email: 'shop@washingpoolfarm.co.uk',
+                    phone: '01305 234567',
+                    address: 'Bridport Road, Dorchester, DT2 8QY',
+                    status: 'active',
+                    lastOrder: '2025-01-16',
+                    totalOrders: 112,
+                    totalSpend: 15670.00,
+                    paymentTerms: '14 days',
+                    notes: 'Mixed retail. Strong vegan ice cream demand.'
+                  },
+                  {
+                    id: 'CUST006',
+                    name: 'Mortons House Hotel',
+                    type: 'Hotel',
+                    contact: 'Richard Blake',
+                    email: 'chef@mortonshouse.co.uk',
+                    phone: '01929 480988',
+                    address: 'East Street, Corfe Castle, BH20 5EE',
+                    status: 'active',
+                    lastOrder: '2025-01-15',
+                    totalOrders: 28,
+                    totalSpend: 6230.00,
+                    paymentTerms: '30 days',
+                    notes: 'Fine dining. Interested in premium and sorbet range.'
+                  },
+                  {
+                    id: 'CUST007',
+                    name: 'Trevors Deli',
+                    type: 'Deli',
+                    contact: 'Trevor Hughes',
+                    email: 'trevor@trevorsdeli.co.uk',
+                    phone: '01305 262456',
+                    address: 'High Street, Weymouth, DT4 8TR',
+                    status: 'active',
+                    lastOrder: '2025-01-14',
+                    totalOrders: 67,
+                    totalSpend: 8940.00,
+                    paymentTerms: '14 days',
+                    notes: 'Retail only. 500ml tubs bestsellers.'
+                  },
+                  {
+                    id: 'CUST008',
+                    name: 'Studland Bay House',
+                    type: 'Beach Cafe',
+                    contact: 'Lisa Carter',
+                    email: 'info@studlandbayhouse.co.uk',
+                    phone: '01929 450266',
+                    address: 'Ferry Road, Studland, BH19 3BA',
+                    status: 'active',
+                    lastOrder: '2025-01-13',
+                    totalOrders: 98,
+                    totalSpend: 18450.00,
+                    paymentTerms: '7 days',
+                    notes: 'Beach location - very seasonal. Big summer orders.'
+                  },
+                  {
+                    id: 'CUST009',
+                    name: 'The Castle Inn',
+                    type: 'Pub',
+                    contact: 'David Green',
+                    email: 'bookings@castleinn-corfe.co.uk',
+                    phone: '01929 480208',
+                    address: 'East Street, Corfe Castle, BH20 5ED',
+                    status: 'active',
+                    lastOrder: '2025-01-12',
+                    totalOrders: 41,
+                    totalSpend: 5890.00,
+                    paymentTerms: '30 days',
+                    notes: 'Traditional pub. Classic flavours preferred.'
+                  },
+                  {
+                    id: 'CUST010',
+                    name: 'Thyme & Tides',
+                    type: 'Deli',
+                    contact: 'Hannah Scott',
+                    email: 'hello@thymeandtides.co.uk',
+                    phone: '01929 427890',
+                    address: 'Station Road, Swanage, BH19 1HB',
+                    status: 'active',
+                    lastOrder: '2025-01-11',
+                    totalOrders: 54,
+                    totalSpend: 7230.00,
+                    paymentTerms: '14 days',
+                    notes: 'Artisan focus. Good vegan range sales.'
+                  }
+                ],
+
+                // Filters
+                searchQuery: '',
+                filterType: 'all',
+                filterStatus: 'all',
+
+                // Modals
+                customerDetailModal: false,
+                addCustomerModal: false,
+                selectedCustomer: null,
+
+                // Forms
+                newCustomer: {
+                  name: '',
+                  type: 'Restaurant',
+                  contact: '',
+                  email: '',
+                  phone: '',
+                  address: '',
+                  paymentTerms: '30 days',
+                  notes: '',
+                  status: 'active'
+                },
+
+                // Success message
+                successMessage: '',
+
+                // Methods
+                filteredCustomers() {
+                  return this.customers.filter(customer => {
+                    if (this.filterType !== 'all' && customer.type !== this.filterType) return false;
+                    if (this.filterStatus !== 'all' && customer.status !== this.filterStatus) return false;
+                    if (this.searchQuery) {
+                      const query = this.searchQuery.toLowerCase();
+                      return customer.name.toLowerCase().includes(query) ||
+                             customer.contact.toLowerCase().includes(query) ||
+                             customer.email.toLowerCase().includes(query) ||
+                             customer.id.toLowerCase().includes(query);
+                    }
+                    return true;
+                  });
+                },
+
+                customerTypes() {
+                  return [...new Set(this.customers.map(c => c.type))];
+                },
+
+                // Methods
+                viewCustomer(customer) {
+                  this.selectedCustomer = JSON.parse(JSON.stringify(customer));
+                  this.customerDetailModal = true;
+                },
+
+                saveCustomer() {
+                  const index = this.customers.findIndex(c => c.id === this.selectedCustomer.id);
+                  if (index > -1) {
+                    this.customers[index] = this.selectedCustomer;
+                  }
+                  this.customerDetailModal = false;
+                  this.showSuccess('Customer updated successfully');
+                },
+
+                openAddCustomer() {
+                  this.newCustomer = {
+                    name: '',
+                    type: 'Restaurant',
+                    contact: '',
+                    email: '',
+                    phone: '',
+                    address: '',
+                    paymentTerms: '30 days',
+                    notes: '',
+                    status: 'active'
+                  };
+                  this.addCustomerModal = true;
+                },
+
+                addCustomer() {
+                  if (!this.newCustomer.name || !this.newCustomer.email) {
+                    alert('Name and email are required');
+                    return;
+                  }
+
+                  const newId = 'CUST' + String(this.customers.length + 1).padStart(3, '0');
+                  this.customers.push({
+                    id: newId,
+                    name: this.newCustomer.name,
+                    type: this.newCustomer.type,
+                    contact: this.newCustomer.contact,
+                    email: this.newCustomer.email,
+                    phone: this.newCustomer.phone,
+                    address: this.newCustomer.address,
+                    status: this.newCustomer.status,
+                    lastOrder: 'Never',
+                    totalOrders: 0,
+                    totalSpend: 0,
+                    paymentTerms: this.newCustomer.paymentTerms,
+                    notes: this.newCustomer.notes
+                  });
+
+                  this.addCustomerModal = false;
+                  this.showSuccess('Customer added successfully');
+                },
+
+                toggleCustomerStatus(customer) {
+                  customer.status = customer.status === 'active' ? 'inactive' : 'active';
+                  this.showSuccess('Customer status updated');
+                },
+
+                showSuccess(message) {
+                  this.successMessage = message;
+                  setTimeout(() => { this.successMessage = ''; }, 3000);
+                },
+
+                formatDate(dateStr) {
+                  if (dateStr === 'Never') return 'Never';
+                  const date = new Date(dateStr);
+                  const now = new Date();
+                  const diffMs = now - date;
+                  const diffDays = Math.floor(diffMs / 86400000);
+
+                  if (diffDays === 0) return 'Today';
+                  if (diffDays === 1) return 'Yesterday';
+                  if (diffDays < 7) return diffDays + 'd ago';
+                  return date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' });
+                },
+
+                formatCurrency(amount) {
+                  return '£' + amount.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                }
+              }"
+            >
+              <!-- Header -->
+              <div class="mb-6">
+                <h2 class="mb-2 text-2xl font-bold text-gray-900 dark:text-white">
+                  Customers
+                </h2>
+                <p class="text-sm text-gray-600 dark:text-gray-400">
+                  Manage your stockists, restaurants, and retail partners
+                </p>
+              </div>
+
+              <!-- Success Message -->
+              <template x-if="successMessage">
+                <div class="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg flex items-center gap-2 text-green-800 dark:bg-green-900/20 dark:border-green-800 dark:text-green-400">
+                  <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                  </svg>
+                  <span x-text="successMessage"></span>
+                </div>
+              </template>
+
+              <!-- Stats Overview -->
+              <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                <div class="bg-white dark:bg-gray-800 rounded-lg p-5 border border-gray-200 dark:border-gray-700">
+                  <div class="flex items-center justify-between">
+                    <div>
+                      <p class="text-sm text-gray-600 dark:text-gray-400">Total Customers</p>
+                      <h3 class="text-2xl font-bold text-gray-900 dark:text-white mt-1" x-text="customers.length"></h3>
+                    </div>
+                    <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
+                      <svg class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="bg-white dark:bg-gray-800 rounded-lg p-5 border border-gray-200 dark:border-gray-700">
+                  <div class="flex items-center justify-between">
+                    <div>
+                      <p class="text-sm text-gray-600 dark:text-gray-400">Active</p>
+                      <h3 class="text-2xl font-bold text-gray-900 dark:text-white mt-1" x-text="customers.filter(c => c.status === 'active').length"></h3>
+                    </div>
+                    <div class="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
+                      <svg class="w-6 h-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="bg-white dark:bg-gray-800 rounded-lg p-5 border border-gray-200 dark:border-gray-700">
+                  <div class="flex items-center justify-between">
+                    <div>
+                      <p class="text-sm text-gray-600 dark:text-gray-400">Total Orders</p>
+                      <h3 class="text-2xl font-bold text-gray-900 dark:text-white mt-1" x-text="customers.reduce((sum, c) => sum + c.totalOrders, 0)"></h3>
+                    </div>
+                    <div class="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center">
+                      <svg class="w-6 h-6 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="bg-white dark:bg-gray-800 rounded-lg p-5 border border-gray-200 dark:border-gray-700">
+                  <div class="flex items-center justify-between">
+                    <div>
+                      <p class="text-sm text-gray-600 dark:text-gray-400">Total Revenue</p>
+                      <h3 class="text-2xl font-bold text-gray-900 dark:text-white mt-1" x-text="formatCurrency(customers.reduce((sum, c) => sum + c.totalSpend, 0))"></h3>
+                    </div>
+                    <div class="w-12 h-12 bg-orange-100 dark:bg-orange-900/30 rounded-lg flex items-center justify-center">
+                      <svg class="w-6 h-6 text-orange-600 dark:text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Actions Bar -->
+              <div class="mb-6 flex flex-wrap items-center gap-4 justify-between">
+                <div class="flex flex-wrap items-center gap-4">
+                  <!-- Search -->
+                  <div class="relative">
+                    <input
+                      type="text"
+                      x-model="searchQuery"
+                      placeholder="Search customers..."
+                      class="py-2 pl-10 pr-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:border-gray-700 dark:text-white"
+                    />
+                    <svg class="absolute left-3 top-2.5 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                    </svg>
+                  </div>
+
+                  <!-- Filter by Type -->
+                  <select
+                    x-model="filterType"
+                    class="py-2 px-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:border-gray-700 dark:text-white"
+                  >
+                    <option value="all">All Types</option>
+                    <template x-for="type in customerTypes()" :key="type">
+                      <option :value="type" x-text="type"></option>
+                    </template>
+                  </select>
+
+                  <!-- Filter by Status -->
+                  <select
+                    x-model="filterStatus"
+                    class="py-2 px-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:border-gray-700 dark:text-white"
+                  >
+                    <option value="all">All Status</option>
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
+                  </select>
+                </div>
+
+                <div class="flex gap-3">
+                  <button
+                    @click="openAddCustomer()"
+                    class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition-colors"
+                  >
+                    + Add Customer
+                  </button>
+                </div>
+              </div>
+
+              <!-- Customers Table -->
+              <div class="bg-white rounded-lg shadow dark:bg-gray-800 overflow-hidden">
+                <div class="overflow-x-auto">
+                  <table class="w-full">
+                    <thead class="bg-gray-50 dark:bg-gray-700">
+                      <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Customer</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Type</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Contact</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Last Order</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Total Spend</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Status</th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700">
+                      <template x-for="customer in filteredCustomers()" :key="customer.id">
+                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer" @click="window.location.href = 'customer-config.html?name=' + encodeURIComponent(customer.name)">
+                          <td class="px-6 py-4">
+                            <div class="flex items-center gap-3">
+                              <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white font-semibold text-sm">
+                                <span x-text="customer.name.split(' ').map(n => n[0]).join('').substring(0, 2)"></span>
+                              </div>
+                              <div>
+                                <div class="font-medium text-gray-900 dark:text-white" x-text="customer.name"></div>
+                                <div class="text-xs text-gray-500 dark:text-gray-400" x-text="customer.id"></div>
+                              </div>
+                            </div>
+                          </td>
+                          <td class="px-6 py-4">
+                            <span class="px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300" x-text="customer.type"></span>
+                          </td>
+                          <td class="px-6 py-4">
+                            <div class="text-sm text-gray-900 dark:text-white" x-text="customer.contact"></div>
+                            <div class="text-xs text-gray-500 dark:text-gray-400" x-text="customer.email"></div>
+                          </td>
+                          <td class="px-6 py-4 text-sm text-gray-900 dark:text-white" x-text="formatDate(customer.lastOrder)"></td>
+                          <td class="px-6 py-4">
+                            <div class="text-sm font-medium text-gray-900 dark:text-white" x-text="formatCurrency(customer.totalSpend)"></div>
+                            <div class="text-xs text-gray-500 dark:text-gray-400"><span x-text="customer.totalOrders"></span> orders</div>
+                          </td>
+                          <td class="px-6 py-4">
+                            <button
+                              @click.stop="toggleCustomerStatus(customer)"
+                              class="px-3 py-1 text-xs font-medium rounded-full transition-colors"
+                              :class="customer.status === 'active' ? 'bg-green-100 text-green-800 hover:bg-green-200 dark:bg-green-900/30 dark:text-green-400' : 'bg-gray-100 text-gray-800 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-400'"
+                              x-text="customer.status === 'active' ? 'Active' : 'Inactive'"
+                            ></button>
+                          </td>
+                          <td class="px-6 py-4 text-right">
+                            <a
+                              :href="'customer-config.html?name=' + encodeURIComponent(customer.name)"
+                              @click.stop
+                              class="px-3 py-1 text-sm text-blue-600 hover:bg-blue-50 rounded dark:text-blue-400 dark:hover:bg-blue-900/30"
+                            >
+                              View
+                            </a>
+                          </td>
+                        </tr>
+                      </template>
+                    </tbody>
+                  </table>
+                </div>
+
+                <!-- Empty state -->
+                <template x-if="filteredCustomers().length === 0">
+                  <div class="px-6 py-12 text-center">
+                    <svg class="mx-auto w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    </svg>
+                    <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">No customers found</p>
+                  </div>
+                </template>
+              </div>
+
+              <!-- Customer Detail Modal -->
+              <template x-if="customerDetailModal && selectedCustomer">
+                <div class="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black bg-opacity-50">
+                  <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+                    <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+                      <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-4">
+                          <div class="w-14 h-14 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white font-bold text-xl">
+                            <span x-text="selectedCustomer.name.split(' ').map(n => n[0]).join('').substring(0, 2)"></span>
+                          </div>
+                          <div>
+                            <h3 class="text-xl font-semibold text-gray-900 dark:text-white" x-text="selectedCustomer.name"></h3>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">
+                              <span x-text="selectedCustomer.type"></span> • <span x-text="selectedCustomer.id"></span>
+                            </p>
+                          </div>
+                        </div>
+                        <button
+                          @click="customerDetailModal = false"
+                          class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                        >
+                          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                    <div class="p-6 space-y-6">
+                      <!-- Stats Row -->
+                      <div class="grid grid-cols-3 gap-4">
+                        <div class="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg text-center">
+                          <p class="text-2xl font-bold text-gray-900 dark:text-white" x-text="selectedCustomer.totalOrders"></p>
+                          <p class="text-xs text-gray-500 dark:text-gray-400">Total Orders</p>
+                        </div>
+                        <div class="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg text-center">
+                          <p class="text-2xl font-bold text-gray-900 dark:text-white" x-text="formatCurrency(selectedCustomer.totalSpend)"></p>
+                          <p class="text-xs text-gray-500 dark:text-gray-400">Total Spend</p>
+                        </div>
+                        <div class="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg text-center">
+                          <p class="text-2xl font-bold text-gray-900 dark:text-white" x-text="formatDate(selectedCustomer.lastOrder)"></p>
+                          <p class="text-xs text-gray-500 dark:text-gray-400">Last Order</p>
+                        </div>
+                      </div>
+
+                      <!-- Contact Details -->
+                      <div class="grid grid-cols-2 gap-4">
+                        <div>
+                          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Contact Name</label>
+                          <input
+                            type="text"
+                            x-model="selectedCustomer.contact"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                          />
+                        </div>
+                        <div>
+                          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email</label>
+                          <input
+                            type="email"
+                            x-model="selectedCustomer.email"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                          />
+                        </div>
+                        <div>
+                          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Phone</label>
+                          <input
+                            type="text"
+                            x-model="selectedCustomer.phone"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                          />
+                        </div>
+                        <div>
+                          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Payment Terms</label>
+                          <select
+                            x-model="selectedCustomer.paymentTerms"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                          >
+                            <option value="7 days">7 days</option>
+                            <option value="14 days">14 days</option>
+                            <option value="30 days">30 days</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Address</label>
+                        <input
+                          type="text"
+                          x-model="selectedCustomer.address"
+                          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                        />
+                      </div>
+
+                      <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Notes</label>
+                        <textarea
+                          x-model="selectedCustomer.notes"
+                          rows="3"
+                          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                          placeholder="Notes about this customer..."
+                        ></textarea>
+                      </div>
+                    </div>
+                    <div class="p-6 border-t border-gray-200 dark:border-gray-700 flex justify-end gap-3">
+                      <button
+                        @click="customerDetailModal = false"
+                        class="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-600"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        @click="saveCustomer()"
+                        class="px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700"
+                      >
+                        Save Changes
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </template>
+
+              <!-- Add Customer Modal -->
+              <template x-if="addCustomerModal">
+                <div class="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black bg-opacity-50">
+                  <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+                    <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+                      <h3 class="text-xl font-semibold text-gray-900 dark:text-white">Add New Customer</h3>
+                    </div>
+                    <div class="p-6 space-y-4">
+                      <div class="grid grid-cols-2 gap-4">
+                        <div>
+                          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Business Name *</label>
+                          <input
+                            type="text"
+                            x-model="newCustomer.name"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                            placeholder="e.g., The Seaside Cafe"
+                          />
+                        </div>
+                        <div>
+                          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Type *</label>
+                          <select
+                            x-model="newCustomer.type"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                          >
+                            <option value="Restaurant">Restaurant</option>
+                            <option value="Hotel">Hotel</option>
+                            <option value="Pub">Pub</option>
+                            <option value="Beach Cafe">Beach Cafe</option>
+                            <option value="Scooping Parlour">Scooping Parlour</option>
+                            <option value="Farm Shop">Farm Shop</option>
+                            <option value="Deli">Deli</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      <div class="grid grid-cols-2 gap-4">
+                        <div>
+                          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Contact Name</label>
+                          <input
+                            type="text"
+                            x-model="newCustomer.contact"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                            placeholder="John Smith"
+                          />
+                        </div>
+                        <div>
+                          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email *</label>
+                          <input
+                            type="email"
+                            x-model="newCustomer.email"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                            placeholder="orders@example.com"
+                          />
+                        </div>
+                      </div>
+
+                      <div class="grid grid-cols-2 gap-4">
+                        <div>
+                          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Phone</label>
+                          <input
+                            type="text"
+                            x-model="newCustomer.phone"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                            placeholder="01234 567890"
+                          />
+                        </div>
+                        <div>
+                          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Payment Terms</label>
+                          <select
+                            x-model="newCustomer.paymentTerms"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                          >
+                            <option value="7 days">7 days</option>
+                            <option value="14 days">14 days</option>
+                            <option value="30 days">30 days</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Address</label>
+                        <input
+                          type="text"
+                          x-model="newCustomer.address"
+                          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                          placeholder="Full address"
+                        />
+                      </div>
+
+                      <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Notes</label>
+                        <textarea
+                          x-model="newCustomer.notes"
+                          rows="2"
+                          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                          placeholder="Any notes about this customer..."
+                        ></textarea>
+                      </div>
+                    </div>
+                    <div class="p-6 border-t border-gray-200 dark:border-gray-700 flex justify-end gap-3">
+                      <button
+                        @click="addCustomerModal = false"
+                        class="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-600"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        @click="addCustomer()"
+                        class="px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700"
+                      >
+                        Add Customer
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </template>
+
+            </div>
+          </div>
+        </main>
+        <!-- ===== Main Content End ===== -->
+      </div>
+      <!-- ===== Content Area End ===== -->
+    </div>
+    <!-- ===== Page Wrapper End ===== -->
+  </body>
+</html>

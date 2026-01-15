@@ -1,0 +1,547 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0"
+    />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>My Dashboard | Purbeck Ice Cream B2B Portal</title>
+  </head>
+  <body
+    x-data="{
+      page: 'buyerDashboard',
+      'loaded': true,
+      'darkMode': false,
+      'cartCount': 3,
+      'user': {
+        name: 'Sarah Mitchell',
+        email: 'sarah.mitchell@thecornishcafe.co.uk',
+        company: 'The Cornish Cafe',
+        role: 'Buyer'
+      },
+      'stats': {
+        ordersThisMonth: 14,
+        pendingApprovals: 1,
+        totalSpent: 2456.75,
+        topProduct: 'Vanilla Bean'
+      },
+      'recentOrders': [
+        { id: 'ORD-2025-0345', date: '2025-01-20', items: 6, total: 148.00, status: 'delivered', products: 'Vanilla Bean, Serious Chocolate, Sorbet' },
+        { id: 'ORD-2025-0343', date: '2025-01-18', items: 12, total: 312.50, status: 'delivered', products: 'Vanilla Bean, Honeycomb Hash, Chocolate Orange' },
+        { id: 'ORD-2025-0340', date: '2025-01-15', items: 8, total: 208.00, status: 'approved', products: 'Serious Chocolate, Cherry Sorbet' },
+        { id: 'ORD-2025-0339', date: '2025-01-12', items: 10, total: 260.50, status: 'pending', products: 'Vanilla Bean, Orange Choc Chip' }
+      ],
+      getBudgetPercent(used, total) {
+        return Math.round((used / total) * 100);
+      },
+      getBudgetColor(used, total) {
+        const percent = (used / total) * 100;
+        if (percent >= 95) return 'bg-red-600';
+        if (percent >= 85) return 'bg-orange-600';
+        return 'bg-green-600';
+      },
+      getStatusColor(status) {
+        if (status === 'delivered') return 'bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-400';
+        if (status === 'approved') return 'bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400';
+        if (status === 'pending') return 'bg-orange-50 text-orange-700 dark:bg-orange-900/20 dark:text-orange-400';
+        return 'bg-gray-50 text-gray-700 dark:bg-gray-900/20 dark:text-gray-400';
+      },
+      formatCurrency(amount) {
+        return '£' + amount.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      }
+    }"
+    x-init="
+         darkMode = JSON.parse(localStorage.getItem('darkMode'));
+         $watch('darkMode', value => localStorage.setItem('darkMode', JSON.stringify(value)))"
+    :class="{'dark bg-gray-900': darkMode === true}"
+  >
+    <!-- ===== Preloader Start ===== -->
+    <include src="./partials/preloader.html"></include>
+    <!-- ===== Preloader End ===== -->
+
+    <!-- ===== Page Container ===== -->
+    <div class="flex min-h-screen flex-col bg-gray-50 dark:bg-gray-900">
+      <!-- ===== Top Navigation Bar ===== -->
+      <header
+        class="sticky top-0 z-50 border-b border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800"
+      >
+        <div class="mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8">
+          <div class="flex h-16 items-center justify-between">
+            <!-- Left: Logo & Nav -->
+            <div class="flex items-center gap-8">
+              <!-- Logo -->
+              <a href="buyer-dashboard.html" class="flex items-center gap-3">
+                <img
+                  src="./images/purbeck_logo.png"
+                  alt="Purbeck Ice Cream"
+                  class="w-[120px] h-auto"
+                />
+              </a>
+
+              <!-- Main Navigation -->
+              <nav class="hidden items-center gap-6 md:flex">
+                <a
+                  href="buyer-dashboard.html"
+                  class="text-sm font-medium text-amber-600 dark:text-amber-400"
+                >
+                  Home
+                </a>
+                <a
+                  href="buyer-products.html"
+                  class="text-sm font-medium text-gray-700 transition-colors hover:text-amber-600 dark:text-gray-300 dark:hover:text-amber-400"
+                >
+                  Products
+                </a>
+                <a
+                  href="buyer-orders.html"
+                  class="text-sm font-medium text-gray-700 transition-colors hover:text-amber-600 dark:text-gray-300 dark:hover:text-amber-400"
+                >
+                  My Orders
+                </a>
+                <a
+                  href="buyer-budget.html"
+                  class="text-sm font-medium text-gray-700 transition-colors hover:text-amber-600 dark:text-gray-300 dark:hover:text-amber-400"
+                >
+                  Budget
+                </a>
+              </nav>
+            </div>
+
+            <!-- Right: Search, Cart, User -->
+            <div class="flex items-center gap-4">
+              <!-- Search -->
+              <div class="hidden lg:block">
+                <div class="relative">
+                  <input
+                    type="search"
+                    placeholder="Search products..."
+                    class="h-10 w-64 rounded-lg border border-gray-300 pr-4 pl-10 text-sm focus:border-transparent focus:ring-2 focus:ring-amber-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400"
+                  />
+                  <svg
+                    class="absolute top-2.5 left-3 h-5 w-5 text-gray-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                    />
+                  </svg>
+                </div>
+              </div>
+
+              <!-- Cart -->
+              <a
+                href="buyer-cart.html"
+                class="relative p-2 text-gray-700 transition-colors hover:text-amber-600 dark:text-gray-300 dark:hover:text-amber-400"
+              >
+                <svg
+                  class="h-6 w-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
+                  />
+                </svg>
+                <span
+                  x-show="cartCount > 0"
+                  class="absolute top-0 right-0 flex h-5 w-5 items-center justify-center rounded-full bg-amber-600 text-xs font-bold text-white"
+                  x-text="cartCount"
+                ></span>
+              </a>
+
+              <!-- User Profile Dropdown -->
+              <div
+                x-data="{ open: false }"
+                @click.away="open = false"
+                class="relative"
+              >
+                <button
+                  @click="open = !open"
+                  class="flex items-center gap-2 p-2 text-gray-700 transition-colors hover:text-amber-600 dark:text-gray-300 dark:hover:text-amber-400"
+                >
+                  <div
+                    class="flex h-8 w-8 items-center justify-center rounded-full bg-amber-600 text-sm font-semibold text-white"
+                  >
+                    <span
+                      x-text="user.name.split(' ').map(n => n[0]).join('')"
+                    ></span>
+                  </div>
+                  <svg
+                    class="h-4 w-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M19 9l-7 7-7-7"
+                    />
+                  </svg>
+                </button>
+
+                <!-- Dropdown Menu -->
+                <div
+                  x-show="open"
+                  x-transition
+                  class="absolute right-0 mt-2 w-64 rounded-lg border border-gray-200 bg-white shadow-xl dark:border-gray-700 dark:bg-gray-800"
+                >
+                  <div
+                    class="border-b border-gray-200 p-4 dark:border-gray-700"
+                  >
+                    <p
+                      class="text-sm font-semibold text-gray-900 dark:text-white"
+                      x-text="user.name"
+                    ></p>
+                    <p
+                      class="text-xs text-gray-500 dark:text-gray-400"
+                      x-text="user.email"
+                    ></p>
+                    <p class="mt-1 text-xs text-gray-600 dark:text-gray-400">
+                      <span x-text="user.company"></span> •
+                      <span x-text="user.role"></span>
+                    </p>
+                  </div>
+                  <div class="p-2">
+                    <a
+                      href="#"
+                      class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
+                    >
+                      <svg
+                        class="h-5 w-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                        />
+                      </svg>
+                      My Account
+                    </a>
+                    <a
+                      href="#"
+                      class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
+                    >
+                      <svg
+                        class="h-5 w-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+                        />
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                        />
+                      </svg>
+                      Settings
+                    </a>
+                  </div>
+                  <div
+                    class="border-t border-gray-200 p-2 dark:border-gray-700"
+                  >
+                    <a
+                      href="b2b-login.html"
+                      class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20"
+                    >
+                      <svg
+                        class="h-5 w-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                        />
+                      </svg>
+                      Sign Out
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- ===== Main Content ===== -->
+      <main class="flex-1 py-8">
+        <div class="mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8">
+          <!-- Welcome Section -->
+          <div class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-900 dark:text-white">
+              Welcome back, <span x-text="user.name.split(' ')[0]"></span>! 👋
+            </h1>
+            <p class="mt-2 text-gray-600 dark:text-gray-400">
+              Here's what's happening with your ice cream orders today.
+            </p>
+          </div>
+
+          <!-- Stats Cards -->
+          <div
+            class="mb-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4"
+          >
+            <!-- Card 1: Orders This Month -->
+            <div
+              class="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800"
+            >
+              <div class="mb-4 flex items-center justify-between">
+                <div
+                  class="flex h-12 w-12 items-center justify-center rounded-xl bg-amber-50 dark:bg-amber-900/20"
+                >
+                  <svg
+                    class="h-6 w-6 text-amber-600 dark:text-amber-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
+                    />
+                  </svg>
+                </div>
+              </div>
+              <p class="text-sm text-gray-500 dark:text-gray-400">
+                Orders This Month
+              </p>
+              <p
+                class="mt-2 text-3xl font-bold text-gray-900 dark:text-white"
+                x-text="stats.ordersThisMonth"
+              ></p>
+            </div>
+
+            <!-- Card 2: Pending Approvals -->
+            <div
+              class="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800"
+            >
+              <div class="mb-4 flex items-center justify-between">
+                <div
+                  class="flex h-12 w-12 items-center justify-center rounded-xl bg-orange-50 dark:bg-orange-900/20"
+                >
+                  <svg
+                    class="h-6 w-6 text-orange-600 dark:text-orange-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
+                </div>
+              </div>
+              <p class="text-sm text-gray-500 dark:text-gray-400">
+                Pending Approvals
+              </p>
+              <p
+                class="mt-2 text-3xl font-bold text-gray-900 dark:text-white"
+                x-text="stats.pendingApprovals"
+              ></p>
+            </div>
+
+            <!-- Card 3: Total Spent -->
+            <div
+              class="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800"
+            >
+              <div class="mb-4 flex items-center justify-between">
+                <div
+                  class="flex h-12 w-12 items-center justify-center rounded-xl bg-green-50 dark:bg-green-900/20"
+                >
+                  <svg
+                    class="h-6 w-6 text-green-600 dark:text-green-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
+                </div>
+              </div>
+              <p class="text-sm text-gray-500 dark:text-gray-400">
+                Total Spent
+              </p>
+              <p
+                class="mt-2 text-3xl font-bold text-gray-900 dark:text-white"
+                x-text="formatCurrency(stats.totalSpent)"
+              ></p>
+            </div>
+
+            <!-- Card 4: Top Product -->
+            <div
+              class="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800"
+            >
+              <div class="mb-4 flex items-center justify-between">
+                <div
+                  class="flex h-12 w-12 items-center justify-center rounded-xl bg-pink-50 dark:bg-pink-900/20"
+                >
+                  <svg
+                    class="h-6 w-6 text-pink-600 dark:text-pink-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
+                </div>
+              </div>
+              <p class="text-sm text-gray-500 dark:text-gray-400">
+                Top Product
+              </p>
+              <p
+                class="mt-2 text-3xl font-bold text-gray-900 dark:text-white"
+                x-text="stats.topProduct"
+              ></p>
+            </div>
+          </div>
+
+          <!-- Recent Orders Section -->
+          <div>
+              <div
+                class="rounded-2xl border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800"
+              >
+                <div
+                  class="flex items-center justify-between border-b border-gray-200 p-6 dark:border-gray-700"
+                >
+                  <div>
+                    <h2 class="text-xl font-bold text-gray-900 dark:text-white">
+                      Recent Orders
+                    </h2>
+                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                      Your latest order activity
+                    </p>
+                  </div>
+                  <a
+                    href="buyer-orders.html"
+                    class="text-sm font-medium text-amber-600 hover:text-amber-700 dark:text-amber-400 dark:hover:text-amber-300"
+                  >
+                    View All →
+                  </a>
+                </div>
+
+                <div class="p-6">
+                  <div class="space-y-4">
+                    <template x-for="order in recentOrders" :key="order.id">
+                      <div
+                        class="flex items-center justify-between rounded-lg border border-gray-200 p-4 transition-colors hover:border-amber-300 dark:border-gray-700 dark:hover:border-amber-600"
+                      >
+                        <div class="flex-1">
+                          <div class="mb-2 flex items-center gap-3">
+                            <p
+                              class="font-semibold text-gray-900 dark:text-white"
+                              x-text="order.id"
+                            ></p>
+                            <span
+                              class="rounded-full px-2 py-1 text-xs font-medium capitalize"
+                              :class="getStatusColor(order.status)"
+                              x-text="order.status"
+                            ></span>
+                          </div>
+                          <p class="text-sm text-gray-500 dark:text-gray-400">
+                            <span x-text="order.items"></span> items •
+                            <span x-text="order.products"></span>
+                          </p>
+                          <p
+                            class="mt-1 text-xs text-gray-400 dark:text-gray-500"
+                            x-text="order.date"
+                          ></p>
+                        </div>
+                        <div class="text-right">
+                          <p
+                            class="text-lg font-bold text-gray-900 dark:text-white"
+                            x-text="formatCurrency(order.total)"
+                          ></p>
+                          <button
+                            class="mt-2 text-sm font-medium text-amber-600 hover:text-amber-700 dark:text-amber-400 dark:hover:text-amber-300"
+                          >
+                            Reorder
+                          </button>
+                        </div>
+                      </div>
+                    </template>
+                  </div>
+                </div>
+              </div>
+            </div>
+        </div>
+      </main>
+
+      <!-- ===== Footer ===== -->
+      <footer
+        class="mt-8 border-t border-gray-200 bg-white py-6 dark:border-gray-700 dark:bg-gray-800"
+      >
+        <div class="mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8">
+          <div
+            class="flex flex-col items-center justify-between gap-4 sm:flex-row"
+          >
+            <p class="text-sm text-gray-500 dark:text-gray-400">
+              © 2025 Purbeck Ice Cream. All rights reserved.
+            </p>
+            <div class="flex items-center gap-6 text-sm">
+              <a
+                href="#"
+                class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+              >
+                Help & Support
+              </a>
+              <a
+                href="#"
+                class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+              >
+                Terms & Conditions
+              </a>
+              <a
+                href="#"
+                class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+              >
+                Privacy Policy
+              </a>
+            </div>
+          </div>
+        </div>
+      </footer>
+    </div>
+    <!-- ===== Page Container End ===== -->
+  </body>
+</html>

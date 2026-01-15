@@ -1,0 +1,339 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0"
+    />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>My Orders | Purbeck Ice Cream B2B Portal</title>
+  </head>
+  <body
+    x-data="{
+      page: 'buyerOrders',
+      'loaded': true,
+      'darkMode': false,
+      'cartCount': 3,
+      'user': {
+        name: 'Sarah Mitchell',
+        email: 'sarah.mitchell@thecornishcafe.co.uk',
+        company: 'The Cornish Cafe',
+        role: 'Buyer'
+      },
+      'filterStatus': 'all',
+      'filterTimeframe': 'all',
+      'orders': [
+        {
+          id: 'ORD-2025-0348',
+          date: '2025-01-20',
+          status: 'delivered',
+          items: 6,
+          total: 148.00,
+          dispatchDate: '2025-01-15',
+          deliveryDate: '2025-01-20',
+          poNumber: 'PO-CORN-2025-0048',
+          items_preview: ['Vanilla Bean', 'Serious Chocolate', 'Cherry Sorbet']
+        },
+        {
+          id: 'ORD-2025-0346',
+          date: '2025-01-18',
+          status: 'dispatched',
+          items: 12,
+          total: 312.50,
+          dispatchDate: '2025-01-18',
+          estimatedDelivery: '2025-01-25',
+          poNumber: 'PO-CORN-2025-0047',
+          items_preview: ['Vanilla Bean', 'Honeycomb Hash', 'Chocolate Orange']
+        },
+        {
+          id: 'ORD-2025-0344',
+          date: '2025-01-15',
+          status: 'approved',
+          items: 8,
+          total: 208.00,
+          dispatchDate: '2025-01-22',
+          poNumber: 'PO-CORN-2025-0046',
+          items_preview: ['Serious Chocolate', 'Cherry Sorbet']
+        },
+        {
+          id: 'ORD-2025-0342',
+          date: '2025-01-12',
+          status: 'delivered',
+          items: 10,
+          total: 260.50,
+          dispatchDate: '2025-01-08',
+          deliveryDate: '2025-01-12',
+          poNumber: 'PO-CORN-2025-0045',
+          items_preview: ['Vanilla Bean', 'Orange Choc Chip']
+        },
+        {
+          id: 'ORD-2025-0340',
+          date: '2025-01-10',
+          status: 'delivered',
+          items: 5,
+          total: 130.00,
+          dispatchDate: '2025-01-08',
+          deliveryDate: '2025-01-10',
+          poNumber: 'PO-CORN-2025-0044',
+          items_preview: ['Honeycomb Hash', 'Chocolate Orange']
+        },
+        {
+          id: 'ORD-2025-0338',
+          date: '2025-01-08',
+          status: 'delivered',
+          items: 15,
+          total: 397.50,
+          dispatchDate: '2025-01-08',
+          deliveryDate: '2025-01-08',
+          poNumber: 'PO-CORN-2025-0043',
+          items_preview: ['Vanilla Bean', 'Serious Chocolate', 'Honeycomb Hash', 'Chocolate Orange', 'Orange Choc Chip']
+        }
+      ],
+      get filteredOrders() {
+        let filtered = this.orders;
+
+        // Status filter
+        if (this.filterStatus !== 'all') {
+          filtered = filtered.filter(o => o.status === this.filterStatus);
+        }
+
+        // Timeframe filter
+        if (this.filterTimeframe !== 'all') {
+          const now = new Date();
+          const orderDate = (order) => new Date(order.date);
+
+          filtered = filtered.filter(o => {
+            const diff = now - orderDate(o);
+            const days = diff / (1000 * 60 * 60 * 24);
+
+            if (this.filterTimeframe === '30days') return days <= 30;
+            if (this.filterTimeframe === '90days') return days <= 90;
+            if (this.filterTimeframe === '6months') return days <= 180;
+            return true;
+          });
+        }
+
+        return filtered;
+      },
+      getStatusConfig(status) {
+        const configs = {
+          'draft': { label: 'Draft', color: 'gray', icon: 'M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z' },
+          'approved': { label: 'Approved', color: 'green', icon: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z' },
+          'dispatched': { label: 'Dispatched', color: 'blue', icon: 'M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4' },
+          'delivered': { label: 'Delivered', color: 'green', icon: 'M5 13l4 4L19 7' }
+        };
+        return configs[status] || configs.draft;
+      },
+      formatCurrency(amount) {
+        return '£' + amount.toFixed(2);
+      },
+      formatDate(dateString) {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+      },
+      reorder(order) {
+        alert('Reordering ' + order.id + '\\n\\nIn a live system, this would:\\n1. Add all items from this order to your cart\\n2. Navigate to the cart page\\n3. Allow you to modify quantities before checkout');
+      },
+      viewOrder(order) {
+        alert('Viewing order details for ' + order.id);
+      }
+    }"
+    x-init="
+         darkMode = JSON.parse(localStorage.getItem('darkMode'));
+         $watch('darkMode', value => localStorage.setItem('darkMode', JSON.stringify(value)))"
+    :class="{'dark bg-gray-900': darkMode === true}"
+  >
+    <!-- ===== Preloader Start ===== -->
+    <include src="./partials/preloader.html"></include>
+    <!-- ===== Preloader End ===== -->
+
+    <!-- ===== Page Container ===== -->
+    <div class="flex flex-col min-h-screen bg-gray-50 dark:bg-gray-900">
+      <!-- ===== Top Navigation Bar ===== -->
+      <include src="./partials/buyer-nav.html"></include>
+
+      <!-- ===== Main Content ===== -->
+      <main class="flex-1 py-8">
+        <div class="px-4 mx-auto max-w-screen-2xl sm:px-6 lg:px-8">
+          <!-- Page Header -->
+          <div class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-900 dark:text-white">My Orders</h1>
+            <p class="mt-2 text-gray-600 dark:text-gray-400">
+              Track and manage your ice cream orders
+            </p>
+          </div>
+
+          <!-- Filters -->
+          <div class="p-6 mb-6 bg-white border border-gray-200 rounded-2xl dark:bg-gray-800 dark:border-gray-700">
+            <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+              <div>
+                <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">Status</label>
+                <select x-model="filterStatus" class="w-full px-4 py-2 border border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                  <option value="all">All Statuses</option>
+                  <option value="approved">Approved</option>
+                  <option value="dispatched">Dispatched</option>
+                  <option value="delivered">Delivered</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">Timeframe</label>
+                <select x-model="filterTimeframe" class="w-full px-4 py-2 border border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                  <option value="all">All Time</option>
+                  <option value="30days">Last 30 Days</option>
+                  <option value="90days">Last 90 Days</option>
+                  <option value="6months">Last 6 Months</option>
+                </select>
+              </div>
+
+              <div class="lg:col-span-2">
+                <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">Search</label>
+                <div class="relative">
+                  <input
+                    type="search"
+                    placeholder="Search by order ID, PO number..."
+                    class="w-full px-4 py-2 pl-10 border border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                  />
+                  <svg class="absolute w-5 h-5 text-gray-400 left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Orders List -->
+          <div class="space-y-4">
+            <template x-for="order in filteredOrders" :key="order.id">
+              <div class="p-6 bg-white border border-gray-200 rounded-2xl dark:bg-gray-800 dark:border-gray-700 hover:shadow-md transition-shadow">
+                <div class="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+                  <!-- Order Info -->
+                  <div class="flex-1">
+                    <div class="flex items-start justify-between mb-3">
+                      <div>
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white" x-text="order.id"></h3>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">
+                          Ordered on <span x-text="formatDate(order.date)"></span>
+                        </p>
+                      </div>
+
+                      <!-- Status Badge -->
+                      <div>
+                        <span
+                          class="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-medium rounded-full"
+                          :class="{
+                            'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300': order.status === 'draft',
+                            'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300': order.status === 'approved',
+                            'bg-amber-100 text-amber-800 dark:bg-amber-900/20 dark:text-amber-300': order.status === 'dispatched',
+                            'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300': order.status === 'delivered'
+                          }"
+                        >
+                          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="getStatusConfig(order.status).icon" />
+                          </svg>
+                          <span x-text="getStatusConfig(order.status).label"></span>
+                        </span>
+                      </div>
+                    </div>
+
+                    <!-- Order Details Grid -->
+                    <div class="grid grid-cols-2 gap-4 mt-4 lg:grid-cols-4">
+                      <div>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">Items</p>
+                        <p class="font-semibold text-gray-900 dark:text-white" x-text="order.items"></p>
+                      </div>
+                      <div>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">Total</p>
+                        <p class="font-semibold text-gray-900 dark:text-white" x-text="formatCurrency(order.total)"></p>
+                      </div>
+                      <div x-show="order.poNumber">
+                        <p class="text-xs text-gray-500 dark:text-gray-400">PO Number</p>
+                        <p class="text-sm font-medium text-gray-900 dark:text-white" x-text="order.poNumber"></p>
+                      </div>
+                      <div x-show="order.dispatchDate">
+                        <p class="text-xs text-gray-500 dark:text-gray-400">Dispatch Date</p>
+                        <p class="text-sm font-medium text-gray-900 dark:text-white" x-text="formatDate(order.dispatchDate)"></p>
+                      </div>
+                    </div>
+
+                    <!-- Items Preview -->
+                    <div class="mt-4">
+                      <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Items</p>
+                      <p class="text-sm text-gray-700 dark:text-gray-300" x-text="order.items_preview.join(', ')"></p>
+                    </div>
+
+                    <!-- Status-specific Info -->
+                    <div x-show="order.status === 'approved'" class="p-3 mt-4 border-l-4 border-green-500 rounded-lg bg-green-50 dark:bg-green-900/20">
+                      <p class="text-sm text-green-800 dark:text-green-300">
+                        Order approved • Will be dispatched on <strong x-text="formatDate(order.dispatchDate)"></strong>
+                      </p>
+                    </div>
+
+                    <div x-show="order.status === 'dispatched'" class="p-3 mt-4 border-l-4 border-amber-500 rounded-lg bg-amber-50 dark:bg-amber-900/20">
+                      <p class="text-sm text-amber-800 dark:text-amber-300">
+                        Estimated delivery: <strong x-text="formatDate(order.estimatedDelivery)"></strong>
+                      </p>
+                    </div>
+
+                    <div x-show="order.status === 'delivered'" class="p-3 mt-4 border-l-4 border-green-500 rounded-lg bg-green-50 dark:bg-green-900/20">
+                      <p class="text-sm text-green-800 dark:text-green-300">
+                        Delivered on <strong x-text="formatDate(order.deliveryDate)"></strong>
+                      </p>
+                    </div>
+                  </div>
+
+                  <!-- Actions -->
+                  <div class="flex gap-2 lg:flex-col lg:min-w-[150px]">
+                    <button @click="viewOrder(order)" class="flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                      </svg>
+                      View Details
+                    </button>
+                    <button @click="reorder(order)" x-show="order.status === 'delivered'" class="flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white bg-amber-600 rounded-lg hover:bg-amber-700">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                      </svg>
+                      Reorder
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </template>
+
+            <!-- Empty State -->
+            <div x-show="filteredOrders.length === 0" class="p-12 text-center bg-white border border-gray-200 rounded-2xl dark:bg-gray-800 dark:border-gray-700">
+              <svg class="w-16 h-16 mx-auto mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              <p class="text-lg font-semibold text-gray-900 dark:text-white">No orders found</p>
+              <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Try adjusting your filters or start a new order</p>
+              <a href="buyer-products.html" class="inline-block px-6 py-3 mt-6 text-sm font-medium text-white bg-amber-600 rounded-lg hover:bg-amber-700">
+                Browse Products
+              </a>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <!-- ===== Footer ===== -->
+      <footer class="py-6 mt-8 bg-white border-t border-gray-200 dark:bg-gray-800 dark:border-gray-700">
+        <div class="px-4 mx-auto max-w-screen-2xl sm:px-6 lg:px-8">
+          <div class="flex flex-col items-center justify-between gap-4 sm:flex-row">
+            <p class="text-sm text-gray-500 dark:text-gray-400">
+              © 2025 Purbeck Ice Cream. All rights reserved.
+            </p>
+            <div class="flex items-center gap-6 text-sm">
+              <a href="#" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300">Help & Support</a>
+              <a href="#" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300">Terms & Conditions</a>
+              <a href="#" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300">Privacy Policy</a>
+            </div>
+          </div>
+        </div>
+      </footer>
+    </div>
+    <!-- ===== Page Container End ===== -->
+  </body>
+</html>

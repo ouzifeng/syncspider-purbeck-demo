@@ -1,0 +1,394 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0"
+    />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Invite Users | Purbeck Ice Cream DataHub</title>
+  </head>
+  <body
+    x-data="{ page: 'inviteUsers', 'loaded': true, 'darkMode': false, 'stickyMenu': false, 'sidebarToggle': false, 'scrollTop': false }"
+    x-init="
+         darkMode = JSON.parse(localStorage.getItem('darkMode'));
+         $watch('darkMode', value => localStorage.setItem('darkMode', JSON.stringify(value)))"
+    :class="{'dark bg-gray-900': darkMode === true}"
+  >
+    <!-- ===== Preloader Start ===== -->
+    <include src="./partials/preloader.html"></include>
+    <!-- ===== Preloader End ===== -->
+
+    <!-- ===== Page Wrapper Start ===== -->
+    <div class="flex h-screen overflow-hidden">
+      <!-- ===== Sidebar Start ===== -->
+      <include src="./partials/sidebar.html"></include>
+      <!-- ===== Sidebar End ===== -->
+
+      <!-- ===== Content Area Start ===== -->
+      <div
+        class="relative flex flex-1 flex-col overflow-x-hidden overflow-y-auto"
+      >
+        <!-- Small Device Overlay Start -->
+        <include src="./partials/overlay.html" />
+        <!-- Small Device Overlay End -->
+
+        <!-- ===== Header Start ===== -->
+        <include src="./partials/header.html" />
+        <!-- ===== Header End ===== -->
+
+        <!-- ===== Main Content Start ===== -->
+        <main>
+          <div class="mx-auto max-w-screen-2xl p-4 md:p-6 2xl:p-10">
+            <!-- Invite Users Component -->
+            <div x-data="inviteUsers()">
+              <!-- Header -->
+              <div class="mb-6">
+                <h2
+                  class="mb-2 text-2xl font-bold text-gray-900 dark:text-white"
+                >
+                  Invite Users
+                </h2>
+                <p class="text-sm text-gray-600 dark:text-gray-400">
+                  Send invitation emails to new users to join Purbeck Ice Cream
+                  DataHub
+                </p>
+              </div>
+
+              <!-- Success Message -->
+              <template x-if="successMessage">
+                <div
+                  class="mb-4 flex items-center gap-2 rounded-lg border border-green-200 bg-green-50 p-4 text-green-800 dark:border-green-800 dark:bg-green-900/20 dark:text-green-400"
+                >
+                  <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path
+                      fill-rule="evenodd"
+                      d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
+                  <span x-text="successMessage"></span>
+                </div>
+              </template>
+
+              <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+                <!-- Invite Form -->
+                <div
+                  class="rounded-lg border border-gray-200 bg-white shadow dark:border-gray-700 dark:bg-gray-800"
+                >
+                  <div class="p-6">
+                    <h3
+                      class="mb-4 text-lg font-semibold text-gray-900 dark:text-white"
+                    >
+                      Send Invitation
+                    </h3>
+                    <form @submit.prevent="sendInvitation()">
+                      <div class="space-y-5">
+                        <!-- Email -->
+                        <div>
+                          <label
+                            class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400"
+                          >
+                            Email Address<span class="text-error-500">*</span>
+                          </label>
+                          <input
+                            type="email"
+                            x-model="newInvite.email"
+                            placeholder="user@company.com"
+                            required
+                            class="shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:ring-3 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30"
+                          />
+                        </div>
+
+                        <!-- First Name -->
+                        <div>
+                          <label
+                            class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400"
+                          >
+                            First Name<span class="text-error-500">*</span>
+                          </label>
+                          <input
+                            type="text"
+                            x-model="newInvite.firstName"
+                            placeholder="John"
+                            required
+                            class="shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:ring-3 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30"
+                          />
+                        </div>
+
+                        <!-- Last Name -->
+                        <div>
+                          <label
+                            class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400"
+                          >
+                            Last Name<span class="text-error-500">*</span>
+                          </label>
+                          <input
+                            type="text"
+                            x-model="newInvite.lastName"
+                            placeholder="Smith"
+                            required
+                            class="shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:ring-3 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30"
+                          />
+                        </div>
+
+                        <!-- Customer -->
+                        <div>
+                          <label
+                            class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400"
+                          >
+                            Customer<span class="text-error-500">*</span>
+                          </label>
+                          <select
+                            x-model="newInvite.customer"
+                            required
+                            class="shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 focus:ring-3 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
+                          >
+                            <option value="">Select a customer</option>
+                            <template
+                              x-for="customer in allCustomers"
+                              :key="customer"
+                            >
+                              <option
+                                :value="customer"
+                                x-text="customer"
+                              ></option>
+                            </template>
+                          </select>
+                        </div>
+
+                        <!-- Role -->
+                        <div>
+                          <label
+                            class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400"
+                          >
+                            Role<span class="text-error-500">*</span>
+                          </label>
+                          <select
+                            x-model="newInvite.role"
+                            required
+                            class="shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 focus:ring-3 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
+                          >
+                            <option value="">Select a role</option>
+                            <option value="Buyer">Buyer</option>
+                            <option value="Approver">Approver</option>
+                            <option value="Admin">Admin</option>
+                          </select>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div>
+                          <button
+                            type="submit"
+                            class="bg-brand-500 shadow-theme-xs hover:bg-brand-600 w-full rounded-lg px-4 py-3 text-sm font-medium text-white transition"
+                          >
+                            Send Invitation
+                          </button>
+                        </div>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+
+                <!-- Pending Invitations -->
+                <div
+                  class="rounded-lg border border-gray-200 bg-white shadow dark:border-gray-700 dark:bg-gray-800"
+                >
+                  <div class="p-6">
+                    <div class="mb-4 flex items-center justify-between">
+                      <h3
+                        class="text-lg font-semibold text-gray-900 dark:text-white"
+                      >
+                        Pending Invitations
+                      </h3>
+                      <span
+                        class="rounded-full bg-orange-100 px-2 py-1 text-xs font-medium text-orange-800 dark:bg-orange-900/30 dark:text-orange-400"
+                        x-text="pendingInvites.length + ' pending'"
+                      ></span>
+                    </div>
+
+                    <div class="max-h-[600px] space-y-3 overflow-y-auto">
+                      <template
+                        x-for="invite in pendingInvites"
+                        :key="invite.id"
+                      >
+                        <div
+                          class="rounded-lg border border-gray-200 p-4 dark:border-gray-700"
+                        >
+                          <div class="flex items-start justify-between">
+                            <div class="flex-1">
+                              <div class="mb-1 flex items-center gap-2">
+                                <p
+                                  class="text-sm font-medium text-gray-900 dark:text-white"
+                                  x-text="invite.firstName + ' ' + invite.lastName"
+                                ></p>
+                                <span
+                                  class="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-800 dark:bg-blue-900/30 dark:text-blue-400"
+                                  x-text="invite.role"
+                                ></span>
+                              </div>
+                              <p
+                                class="text-sm text-gray-600 dark:text-gray-400"
+                                x-text="invite.email"
+                              ></p>
+                              <p
+                                class="mt-1 text-xs text-gray-500 dark:text-gray-500"
+                                x-text="invite.customer"
+                              ></p>
+                              <p
+                                class="mt-1 text-xs text-gray-400 dark:text-gray-500"
+                              >
+                                Sent
+                                <span
+                                  x-text="formatDate(invite.sentDate)"
+                                ></span>
+                              </p>
+                            </div>
+                            <button
+                              @click="resendInvitation(invite)"
+                              class="text-brand-600 hover:bg-brand-50 dark:text-brand-400 dark:hover:bg-brand-900/30 rounded px-3 py-1 text-xs"
+                            >
+                              Resend
+                            </button>
+                          </div>
+                        </div>
+                      </template>
+
+                      <template x-if="pendingInvites.length === 0">
+                        <div class="py-12 text-center">
+                          <svg
+                            class="mx-auto h-12 w-12 text-gray-400"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              stroke-width="2"
+                              d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                            />
+                          </svg>
+                          <p
+                            class="mt-2 text-sm text-gray-600 dark:text-gray-400"
+                          >
+                            No pending invitations
+                          </p>
+                        </div>
+                      </template>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Recent Invitations History -->
+              <div
+                class="mt-6 rounded-lg border border-gray-200 bg-white shadow dark:border-gray-700 dark:bg-gray-800"
+              >
+                <div class="p-6">
+                  <h3
+                    class="mb-4 text-lg font-semibold text-gray-900 dark:text-white"
+                  >
+                    Recent Invitations
+                  </h3>
+
+                  <div class="overflow-x-auto">
+                    <table class="w-full">
+                      <thead class="bg-gray-50 dark:bg-gray-700">
+                        <tr>
+                          <th
+                            class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-300"
+                          >
+                            User
+                          </th>
+                          <th
+                            class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-300"
+                          >
+                            Email
+                          </th>
+                          <th
+                            class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-300"
+                          >
+                            Customer
+                          </th>
+                          <th
+                            class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-300"
+                          >
+                            Role
+                          </th>
+                          <th
+                            class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-300"
+                          >
+                            Sent Date
+                          </th>
+                          <th
+                            class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-300"
+                          >
+                            Status
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody
+                        class="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-800"
+                      >
+                        <template x-for="invite in allInvites" :key="invite.id">
+                          <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
+                            <td class="px-6 py-4">
+                              <div
+                                class="text-sm font-medium text-gray-900 dark:text-white"
+                                x-text="invite.firstName + ' ' + invite.lastName"
+                              ></div>
+                            </td>
+                            <td class="px-6 py-4">
+                              <div
+                                class="text-sm text-gray-900 dark:text-white"
+                                x-text="invite.email"
+                              ></div>
+                            </td>
+                            <td class="px-6 py-4">
+                              <div
+                                class="text-sm text-gray-900 dark:text-white"
+                                x-text="invite.customer"
+                              ></div>
+                            </td>
+                            <td class="px-6 py-4">
+                              <span
+                                class="rounded-full bg-blue-100 px-2 py-1 text-xs font-medium text-blue-800 dark:bg-blue-900/30 dark:text-blue-400"
+                                x-text="invite.role"
+                              ></span>
+                            </td>
+                            <td class="px-6 py-4">
+                              <div
+                                class="text-sm text-gray-900 dark:text-white"
+                                x-text="formatDate(invite.sentDate)"
+                              ></div>
+                            </td>
+                            <td class="px-6 py-4">
+                              <span
+                                class="rounded-full px-2 py-1 text-xs font-medium"
+                                :class="{
+                                  'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400': invite.status === 'pending',
+                                  'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400': invite.status === 'accepted',
+                                  'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-400': invite.status === 'expired'
+                                }"
+                                x-text="invite.status.charAt(0).toUpperCase() + invite.status.slice(1)"
+                              ></span>
+                            </td>
+                          </tr>
+                        </template>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+        <!-- ===== Main Content End ===== -->
+      </div>
+      <!-- ===== Content Area End ===== -->
+    </div>
+    <!-- ===== Page Wrapper End ===== -->
+  </body>
+</html>

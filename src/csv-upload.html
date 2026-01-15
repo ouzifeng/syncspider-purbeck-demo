@@ -1,0 +1,804 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0"
+    />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>
+      CSV Upload - Cost Center Management | TailAdmin
+    </title>
+  </head>
+  <body
+    x-data="{
+      page: 'csvUpload',
+      'loaded': true,
+      'darkMode': false,
+      'stickyMenu': false,
+      'sidebarToggle': false,
+      'scrollTop': false,
+      'step': 1,
+      'selectedCustomer': 'Hugo Boss',
+      'uploadedFile': null,
+      'uploading': false,
+      'processing': false,
+      'importing': false,
+      'importSuccess': false,
+      'mappings': {},
+      simulateUpload() {
+        this.uploading = true;
+        this.uploadedFile = 'hugo_boss_cost_centers_2025.csv';
+        setTimeout(() => {
+          this.uploading = false;
+        }, 1500);
+      },
+      goToStep2() {
+        this.processing = true;
+        setTimeout(() => {
+          this.processing = false;
+          this.step = 2;
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }, 800);
+      },
+      goToStep3() {
+        this.processing = true;
+        setTimeout(() => {
+          this.processing = false;
+          this.step = 3;
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }, 1200);
+      },
+      importData() {
+        this.importing = true;
+        setTimeout(() => {
+          this.importing = false;
+          this.importSuccess = true;
+          setTimeout(() => {
+            window.location.href = 'cost-centers.html';
+          }, 2500);
+        }, 2000);
+      }
+    }"
+    x-init="
+         darkMode = JSON.parse(localStorage.getItem('darkMode'));
+         $watch('darkMode', value => localStorage.setItem('darkMode', JSON.stringify(value)))"
+    :class="{'dark bg-gray-900': darkMode === true}"
+  >
+    <!-- ===== Preloader Start ===== -->
+    <include src="./partials/preloader.html"></include>
+    <!-- ===== Preloader End ===== -->
+
+    <!-- ===== Page Wrapper Start ===== -->
+    <div class="flex h-screen overflow-hidden">
+      <!-- ===== Sidebar Start ===== -->
+      <include src="./partials/sidebar.html"></include>
+      <!-- ===== Sidebar End ===== -->
+
+      <!-- ===== Content Area Start ===== -->
+      <div
+        class="relative flex flex-1 flex-col overflow-x-hidden overflow-y-auto"
+      >
+        <!-- Small Device Overlay Start -->
+        <include src="./partials/overlay.html" />
+        <!-- Small Device Overlay End -->
+
+        <!-- ===== Header Start ===== -->
+        <include src="./partials/header.html" />
+        <!-- ===== Header End ===== -->
+
+        <!-- ===== Main Content Start ===== -->
+        <main>
+          <div class="mx-auto max-w-(--breakpoint-2xl) p-4 md:p-6">
+            <!-- Breadcrumb Start -->
+            <div x-data="{ pageName: `CSV Upload - Cost Centers`}">
+              <include src="./partials/breadcrumb.html" />
+            </div>
+            <!-- Breadcrumb End -->
+
+            <!-- Progress Steps -->
+            <div class="mb-6">
+              <div class="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.03]">
+                <div class="flex items-center justify-between">
+                  <!-- Step 1 -->
+                  <div class="flex items-center flex-1">
+                    <div
+                      class="flex h-10 w-10 items-center justify-center rounded-full transition-colors"
+                      :class="step >= 1 ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-500 dark:bg-gray-800 dark:text-gray-400'"
+                    >
+                      <span class="font-semibold">1</span>
+                    </div>
+                    <div class="ml-3">
+                      <p class="text-sm font-medium text-gray-800 dark:text-white/90">Upload File</p>
+                      <p class="text-xs text-gray-500 dark:text-gray-400">Select CSV file</p>
+                    </div>
+                  </div>
+
+                  <!-- Divider -->
+                  <div class="flex-1 h-0.5 mx-4 bg-gray-200 dark:bg-gray-800" :class="step >= 2 ? 'bg-blue-600' : ''"></div>
+
+                  <!-- Step 2 -->
+                  <div class="flex items-center flex-1">
+                    <div
+                      class="flex h-10 w-10 items-center justify-center rounded-full transition-colors"
+                      :class="step >= 2 ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-500 dark:bg-gray-800 dark:text-gray-400'"
+                    >
+                      <span class="font-semibold">2</span>
+                    </div>
+                    <div class="ml-3">
+                      <p class="text-sm font-medium text-gray-800 dark:text-white/90">Map Columns</p>
+                      <p class="text-xs text-gray-500 dark:text-gray-400">Match fields</p>
+                    </div>
+                  </div>
+
+                  <!-- Divider -->
+                  <div class="flex-1 h-0.5 mx-4 bg-gray-200 dark:bg-gray-800" :class="step >= 3 ? 'bg-blue-600' : ''"></div>
+
+                  <!-- Step 3 -->
+                  <div class="flex items-center flex-1">
+                    <div
+                      class="flex h-10 w-10 items-center justify-center rounded-full transition-colors"
+                      :class="step >= 3 ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-500 dark:bg-gray-800 dark:text-gray-400'"
+                    >
+                      <span class="font-semibold">3</span>
+                    </div>
+                    <div class="ml-3">
+                      <p class="text-sm font-medium text-gray-800 dark:text-white/90">Validate</p>
+                      <p class="text-xs text-gray-500 dark:text-gray-400">Review & confirm</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Step 1: Upload File -->
+            <div x-show="step === 1" class="space-y-6">
+              <!-- Customer Selection -->
+              <div class="rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
+                <div class="px-5 py-4 sm:px-6 sm:py-5 border-b border-gray-100 dark:border-gray-800">
+                  <h3 class="text-base font-medium text-gray-800 dark:text-white/90">
+                    Select Customer
+                  </h3>
+                </div>
+                <div class="p-5 sm:p-6">
+                  <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
+                    Customer Account
+                  </label>
+                  <select
+                    x-model="selectedCustomer"
+                    class="shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 focus:ring-3 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
+                  >
+                    <option>Hugo Boss</option>
+                    <option>Customer A</option>
+                    <option>Customer B</option>
+                    <option>Customer C</option>
+                    <option>Customer D</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- File Upload -->
+              <div class="rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
+                <div class="px-5 py-4 sm:px-6 sm:py-5 border-b border-gray-100 dark:border-gray-800">
+                  <h3 class="text-base font-medium text-gray-800 dark:text-white/90">
+                    Upload Cost Center Data
+                  </h3>
+                  <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                    Upload a CSV file containing user, product, and cost center mappings
+                  </p>
+                </div>
+                <div class="p-5 sm:p-6">
+                  <!-- Upload Area -->
+                  <div
+                    class="border-2 border-dashed rounded-lg p-8 text-center transition-all cursor-pointer"
+                    :class="uploading ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/10' : 'border-gray-300 hover:border-blue-500 dark:border-gray-700'"
+                    @click="simulateUpload()"
+                  >
+                    <!-- Uploading State -->
+                    <div x-show="uploading" x-cloak class="flex flex-col items-center">
+                      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+                      <p class="mt-4 text-sm font-medium text-blue-600">Uploading and analyzing file...</p>
+                    </div>
+
+                    <!-- Initial State -->
+                    <div x-show="!uploadedFile && !uploading">
+                      <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 48 48">
+                        <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                      </svg>
+                      <div class="mt-4">
+                        <p class="text-sm text-gray-600 dark:text-gray-400">
+                          <span class="font-semibold text-blue-600">Click to upload</span> or drag and drop
+                        </p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                          CSV files only (MAX. 10MB)
+                        </p>
+                      </div>
+                    </div>
+
+                    <!-- Uploaded State -->
+                    <div x-show="uploadedFile && !uploading" x-cloak class="flex flex-col items-center">
+                      <div class="inline-flex items-center px-4 py-2 bg-green-50 rounded-lg dark:bg-green-900/20 border border-green-200 dark:border-green-800">
+                        <svg class="h-5 w-5 text-green-600 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                        </svg>
+                        <div class="text-left">
+                          <p class="text-sm font-medium text-green-800 dark:text-green-400" x-text="uploadedFile"></p>
+                          <p class="text-xs text-green-600 dark:text-green-500">265 rows detected • Ready to process</p>
+                        </div>
+                      </div>
+                      <button @click.stop="uploadedFile = null" class="mt-3 text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300">
+                        Remove file
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- Template Download -->
+                  <div class="mt-6 p-4 bg-blue-50 rounded-lg dark:bg-blue-900/20">
+                    <div class="flex items-start">
+                      <svg class="h-5 w-5 text-blue-600 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                      </svg>
+                      <div class="ml-3 flex-1">
+                        <p class="text-sm font-medium text-blue-800 dark:text-blue-400">
+                          Need a template?
+                        </p>
+                        <p class="mt-1 text-sm text-blue-700 dark:text-blue-500">
+                          Download our CSV template to see the required format and column headers.
+                        </p>
+                        <a href="#" class="mt-2 inline-flex items-center text-sm font-medium text-blue-600 hover:text-blue-700">
+                          Download Template
+                          <svg class="ml-1 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                          </svg>
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Action Buttons -->
+                  <div class="mt-6 flex justify-end">
+                    <button
+                      @click="goToStep2()"
+                      :disabled="!uploadedFile || processing"
+                      class="inline-flex items-center px-6 py-2.5 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    >
+                      <svg x-show="processing" class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      <span x-text="processing ? 'Processing...' : 'Next: Preview Data'"></span>
+                      <svg x-show="!processing" class="ml-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Step 2: Map Columns -->
+            <div x-show="step === 2" x-cloak class="space-y-6">
+              <!-- Data Preview -->
+              <div class="rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
+                <div class="px-5 py-4 sm:px-6 sm:py-5 border-b border-gray-100 dark:border-gray-800">
+                  <h3 class="text-base font-medium text-gray-800 dark:text-white/90">
+                    Data Preview
+                  </h3>
+                  <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                    First 5 rows from your CSV file
+                  </p>
+                </div>
+                <div class="overflow-x-auto">
+                  <table class="w-full table-auto">
+                    <thead class="bg-gray-50 dark:bg-gray-800/50">
+                      <tr>
+                        <th class="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400">Employee_ID</th>
+                        <th class="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400">Product_Code</th>
+                        <th class="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400">Budget_Category</th>
+                        <th class="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400">Annual_Budget</th>
+                      </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200 dark:bg-transparent dark:divide-gray-800">
+                      <tr>
+                        <td class="px-5 py-4 text-sm text-gray-800 dark:text-white/90">HB-001</td>
+                        <td class="px-5 py-4 text-sm text-gray-800 dark:text-white/90">POLO-BLUE</td>
+                        <td class="px-5 py-4 text-sm text-gray-800 dark:text-white/90">UNIFORM-SHIRTS</td>
+                        <td class="px-5 py-4 text-sm text-gray-800 dark:text-white/90">3000</td>
+                      </tr>
+                      <tr>
+                        <td class="px-5 py-4 text-sm text-gray-800 dark:text-white/90">HB-001</td>
+                        <td class="px-5 py-4 text-sm text-gray-800 dark:text-white/90">PEN-BLK</td>
+                        <td class="px-5 py-4 text-sm text-gray-800 dark:text-white/90">STATIONERY</td>
+                        <td class="px-5 py-4 text-sm text-gray-800 dark:text-white/90">1200</td>
+                      </tr>
+                      <tr>
+                        <td class="px-5 py-4 text-sm text-gray-800 dark:text-white/90">HB-002</td>
+                        <td class="px-5 py-4 text-sm text-gray-800 dark:text-white/90">POLO-BLUE</td>
+                        <td class="px-5 py-4 text-sm text-gray-800 dark:text-white/90">HO-UNIFORM</td>
+                        <td class="px-5 py-4 text-sm text-gray-800 dark:text-white/90">5000</td>
+                      </tr>
+                      <tr>
+                        <td class="px-5 py-4 text-sm text-gray-800 dark:text-white/90">HB-003</td>
+                        <td class="px-5 py-4 text-sm text-gray-800 dark:text-white/90">NOTEBOOK-A4</td>
+                        <td class="px-5 py-4 text-sm text-gray-800 dark:text-white/90">STATIONERY</td>
+                        <td class="px-5 py-4 text-sm text-gray-800 dark:text-white/90">800</td>
+                      </tr>
+                      <tr>
+                        <td class="px-5 py-4 text-sm text-gray-800 dark:text-white/90">HB-004</td>
+                        <td class="px-5 py-4 text-sm text-gray-800 dark:text-white/90">MOP-BUCKET</td>
+                        <td class="px-5 py-4 text-sm text-gray-800 dark:text-white/90">JANITORIAL</td>
+                        <td class="px-5 py-4 text-sm text-gray-800 dark:text-white/90">600</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <!-- Column Mapping -->
+              <div class="rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
+                <div class="px-5 py-4 sm:px-6 sm:py-5 border-b border-gray-100 dark:border-gray-800">
+                  <h3 class="text-base font-medium text-gray-800 dark:text-white/90">
+                    Map Columns to System Fields
+                  </h3>
+                  <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                    Match your CSV columns to our system fields
+                  </p>
+                </div>
+                <div class="p-5 sm:p-6 space-y-4">
+                  <!-- Mapping Row 1 -->
+                  <div class="flex items-center space-x-4">
+                    <div class="flex-1">
+                      <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
+                        CSV Column
+                      </label>
+                      <input
+                        type="text"
+                        value="Employee_ID"
+                        readonly
+                        class="shadow-theme-xs h-11 w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-2.5 text-sm text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-white/90"
+                      />
+                    </div>
+                    <div class="flex items-center mt-6">
+                      <svg class="h-6 w-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                      </svg>
+                    </div>
+                    <div class="flex-1">
+                      <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
+                        System Field
+                      </label>
+                      <select class="shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 focus:ring-3 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90">
+                        <option value="">Select field...</option>
+                        <option value="user_id" selected>User Reference</option>
+                        <option value="product_sku">Product SKU</option>
+                        <option value="cost_center">Cost Center Name</option>
+                        <option value="budget">Budget Amount</option>
+                      </select>
+                    </div>
+                    <div class="mt-6">
+                      <span class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/20">
+                        <svg class="h-4 w-4 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                          <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                        </svg>
+                      </span>
+                    </div>
+                  </div>
+
+                  <!-- Mapping Row 2 -->
+                  <div class="flex items-center space-x-4">
+                    <div class="flex-1">
+                      <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
+                        CSV Column
+                      </label>
+                      <input
+                        type="text"
+                        value="Product_Code"
+                        readonly
+                        class="shadow-theme-xs h-11 w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-2.5 text-sm text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-white/90"
+                      />
+                    </div>
+                    <div class="flex items-center mt-6">
+                      <svg class="h-6 w-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                      </svg>
+                    </div>
+                    <div class="flex-1">
+                      <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
+                        System Field
+                      </label>
+                      <select class="shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 focus:ring-3 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90">
+                        <option value="">Select field...</option>
+                        <option value="user_id">User Reference</option>
+                        <option value="product_sku" selected>Product SKU</option>
+                        <option value="cost_center">Cost Center Name</option>
+                        <option value="budget">Budget Amount</option>
+                      </select>
+                    </div>
+                    <div class="mt-6">
+                      <span class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/20">
+                        <svg class="h-4 w-4 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                          <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                        </svg>
+                      </span>
+                    </div>
+                  </div>
+
+                  <!-- Mapping Row 3 -->
+                  <div class="flex items-center space-x-4">
+                    <div class="flex-1">
+                      <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
+                        CSV Column
+                      </label>
+                      <input
+                        type="text"
+                        value="Budget_Category"
+                        readonly
+                        class="shadow-theme-xs h-11 w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-2.5 text-sm text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-white/90"
+                      />
+                    </div>
+                    <div class="flex items-center mt-6">
+                      <svg class="h-6 w-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                      </svg>
+                    </div>
+                    <div class="flex-1">
+                      <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
+                        System Field
+                      </label>
+                      <select class="shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 focus:ring-3 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90">
+                        <option value="">Select field...</option>
+                        <option value="user_id">User Reference</option>
+                        <option value="product_sku">Product SKU</option>
+                        <option value="cost_center" selected>Cost Center Name</option>
+                        <option value="budget">Budget Amount</option>
+                      </select>
+                    </div>
+                    <div class="mt-6">
+                      <span class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/20">
+                        <svg class="h-4 w-4 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                          <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                        </svg>
+                      </span>
+                    </div>
+                  </div>
+
+                  <!-- Mapping Row 4 -->
+                  <div class="flex items-center space-x-4">
+                    <div class="flex-1">
+                      <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
+                        CSV Column
+                      </label>
+                      <input
+                        type="text"
+                        value="Annual_Budget"
+                        readonly
+                        class="shadow-theme-xs h-11 w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-2.5 text-sm text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-white/90"
+                      />
+                    </div>
+                    <div class="flex items-center mt-6">
+                      <svg class="h-6 w-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                      </svg>
+                    </div>
+                    <div class="flex-1">
+                      <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
+                        System Field
+                      </label>
+                      <select class="shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 focus:ring-3 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90">
+                        <option value="">Select field...</option>
+                        <option value="user_id">User Reference</option>
+                        <option value="product_sku">Product SKU</option>
+                        <option value="cost_center">Cost Center Name</option>
+                        <option value="budget" selected>Budget Amount</option>
+                      </select>
+                    </div>
+                    <div class="mt-6">
+                      <span class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/20">
+                        <svg class="h-4 w-4 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                          <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                        </svg>
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Additional Settings -->
+              <div class="rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
+                <div class="px-5 py-4 sm:px-6 sm:py-5 border-b border-gray-100 dark:border-gray-800">
+                  <h3 class="text-base font-medium text-gray-800 dark:text-white/90">
+                    Additional Settings
+                  </h3>
+                </div>
+                <div class="p-5 sm:p-6 space-y-4">
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
+                        Budget Period
+                      </label>
+                      <select class="shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 focus:ring-3 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90">
+                        <option>Yearly</option>
+                        <option>Quarterly</option>
+                        <option>Monthly</option>
+                        <option>Custom</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
+                        Start Date
+                      </label>
+                      <input
+                        type="date"
+                        value="2025-04-01"
+                        class="shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 focus:ring-3 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
+                      />
+                    </div>
+                    <div>
+                      <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
+                        Over Budget Action
+                      </label>
+                      <select class="shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 focus:ring-3 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90">
+                        <option>Require Approval</option>
+                        <option>Block Checkout</option>
+                        <option>Allow with Warning</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
+                        Currency
+                      </label>
+                      <select class="shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 focus:ring-3 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90">
+                        <option>GBP (£)</option>
+                        <option>EUR (€)</option>
+                        <option>USD ($)</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Action Buttons -->
+              <div class="flex justify-between">
+                <button
+                  @click="step = 1"
+                  :disabled="processing"
+                  class="inline-flex items-center px-6 py-2.5 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                  </svg>
+                  Back
+                </button>
+                <button
+                  @click="goToStep3()"
+                  :disabled="processing"
+                  class="inline-flex items-center px-6 py-2.5 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  <svg x-show="processing" class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  <span x-text="processing ? 'Validating...' : 'Next: Validate Data'"></span>
+                  <svg x-show="!processing" class="ml-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <!-- Step 3: Validate -->
+            <div x-show="step === 3" x-cloak class="space-y-6">
+              <!-- Validation Results -->
+              <div class="rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
+                <div class="px-5 py-4 sm:px-6 sm:py-5 border-b border-gray-100 dark:border-gray-800">
+                  <h3 class="text-base font-medium text-gray-800 dark:text-white/90">
+                    Validation Results
+                  </h3>
+                  <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                    Review data quality before importing
+                  </p>
+                </div>
+                <div class="p-5 sm:p-6 space-y-4">
+                  <!-- Success Messages -->
+                  <include src="./partials/alert/alert-success.html" />
+
+                  <div class="mt-4 space-y-3">
+                    <div class="flex items-center text-sm">
+                      <svg class="h-5 w-5 text-green-600 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                      </svg>
+                      <span class="text-gray-800 dark:text-white/90"><strong>245 users</strong> matched successfully</span>
+                    </div>
+                    <div class="flex items-center text-sm">
+                      <svg class="h-5 w-5 text-green-600 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                      </svg>
+                      <span class="text-gray-800 dark:text-white/90"><strong>189 products</strong> found in catalog</span>
+                    </div>
+                    <div class="flex items-center text-sm">
+                      <svg class="h-5 w-5 text-green-600 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                      </svg>
+                      <span class="text-gray-800 dark:text-white/90"><strong>312 cost center mappings</strong> created</span>
+                    </div>
+                  </div>
+
+                  <!-- Warning Messages -->
+                  <div class="mt-6">
+                    <include src="./partials/alert/alert-warning.html" />
+
+                    <div class="mt-4 space-y-3">
+                      <div class="flex items-start text-sm">
+                        <svg class="h-5 w-5 text-yellow-600 mr-3 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                          <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                        </svg>
+                        <div>
+                          <span class="text-gray-800 dark:text-white/90"><strong>12 users</strong> not found in system</span>
+                          <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">These users will need to be created before import</p>
+                        </div>
+                      </div>
+                      <div class="flex items-start text-sm">
+                        <svg class="h-5 w-5 text-yellow-600 mr-3 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                          <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                        </svg>
+                        <div>
+                          <span class="text-gray-800 dark:text-white/90"><strong>5 products</strong> not in catalog</span>
+                          <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">These products need to be added to your catalog first</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Error Messages -->
+                  <div class="mt-6">
+                    <include src="./partials/alert/alert-error.html" />
+
+                    <div class="mt-4 space-y-3">
+                      <div class="flex items-start text-sm">
+                        <svg class="h-5 w-5 text-red-600 mr-3 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                        </svg>
+                        <div>
+                          <span class="text-gray-800 dark:text-white/90"><strong>3 rows</strong> missing budget amounts</span>
+                          <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Rows 45, 67, 89 - Budget field is required</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Import Summary -->
+              <div class="rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
+                <div class="px-5 py-4 sm:px-6 sm:py-5 border-b border-gray-100 dark:border-gray-800">
+                  <h3 class="text-base font-medium text-gray-800 dark:text-white/90">
+                    Import Summary
+                  </h3>
+                </div>
+                <div class="p-5 sm:p-6">
+                  <dl class="grid grid-cols-1 gap-5 sm:grid-cols-3">
+                    <div class="px-4 py-5 bg-green-50 rounded-lg dark:bg-green-900/20">
+                      <dt class="text-sm font-medium text-green-600 truncate">
+                        Ready to Import
+                      </dt>
+                      <dd class="mt-1 text-3xl font-semibold text-green-900 dark:text-green-400">
+                        245
+                      </dd>
+                    </div>
+                    <div class="px-4 py-5 bg-yellow-50 rounded-lg dark:bg-yellow-900/20">
+                      <dt class="text-sm font-medium text-yellow-600 truncate">
+                        Warnings
+                      </dt>
+                      <dd class="mt-1 text-3xl font-semibold text-yellow-900 dark:text-yellow-400">
+                        17
+                      </dd>
+                    </div>
+                    <div class="px-4 py-5 bg-red-50 rounded-lg dark:bg-red-900/20">
+                      <dt class="text-sm font-medium text-red-600 truncate">
+                        Errors
+                      </dt>
+                      <dd class="mt-1 text-3xl font-semibold text-red-900 dark:text-red-400">
+                        3
+                      </dd>
+                    </div>
+                  </dl>
+
+                  <div class="mt-6 bg-blue-50 rounded-lg p-4 dark:bg-blue-900/20">
+                    <div class="flex">
+                      <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                          <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                        </svg>
+                      </div>
+                      <div class="ml-3 flex-1">
+                        <p class="text-sm text-blue-700 dark:text-blue-400">
+                          <strong>Import Options:</strong> You can fix errors now or import valid records and fix errors later.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Action Buttons -->
+              <div class="flex justify-between">
+                <button
+                  @click="step = 2"
+                  :disabled="importing"
+                  class="inline-flex items-center px-6 py-2.5 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                  </svg>
+                  Back to Mapping
+                </button>
+                <div class="space-x-3">
+                  <button
+                    @click="step = 2"
+                    :disabled="importing"
+                    class="inline-flex items-center px-6 py-2.5 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  >
+                    Fix Errors
+                  </button>
+                  <button
+                    @click="importData()"
+                    :disabled="importing"
+                    class="inline-flex items-center px-6 py-2.5 border border-transparent text-sm font-medium rounded-lg text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  >
+                    <svg x-show="importing" class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <svg x-show="!importing" class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                    <span x-text="importing ? 'Importing Data...' : 'Import Valid Records'"></span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Import Success Modal -->
+              <div
+                x-show="importSuccess"
+                x-cloak
+                class="fixed inset-0 z-99999 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm"
+              >
+                <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md mx-4 dark:bg-gray-900 transform transition-all"
+                     x-transition:enter="transition ease-out duration-300"
+                     x-transition:enter-start="opacity-0 scale-95"
+                     x-transition:enter-end="opacity-100 scale-100">
+                  <div class="text-center">
+                    <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100 dark:bg-green-900/20 mb-4">
+                      <svg class="h-8 w-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                      Import Successful!
+                    </h3>
+                    <p class="text-gray-600 dark:text-gray-400 mb-6">
+                      Successfully imported <strong>245 cost center mappings</strong> for Hugo Boss.
+                    </p>
+                    <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 mb-6">
+                      <div class="flex items-center justify-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
+                        <svg class="animate-spin h-4 w-4 text-blue-600" fill="none" viewBox="0 0 24 24">
+                          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <span>Redirecting to Cost Centers page...</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+        <!-- ===== Main Content End ===== -->
+      </div>
+      <!-- ===== Content Area End ===== -->
+    </div>
+    <!-- ===== Page Wrapper End ===== -->
+  </body>
+</html>

@@ -1,0 +1,429 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0"
+    />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Bulk Order Upload | Purbeck Ice Cream B2B Portal</title>
+  </head>
+  <body
+    x-data="{
+      page: 'buyerBulkUpload',
+      'loaded': true,
+      'darkMode': false,
+      'cartCount': 3,
+      'user': {
+        name: 'Sarah Mitchell',
+        email: 'sarah.mitchell@thecornishcafe.co.uk',
+        company: 'The Cornish Cafe',
+        role: 'Buyer'
+      },
+      'uploadStep': 1,
+      'uploadedFile': null,
+      'fileName': '',
+      'uploadedData': [],
+      'validationErrors': [],
+      'selectedCostCenter': 'Uniforms',
+      'selectedDispatchDate': '2025-01-22',
+      'dispatchDates': [
+        { date: '2025-01-22', label: 'Wednesday, 22nd January 2025 (Next Scheduled)' },
+        { date: '2025-02-26', label: 'Wednesday, 26th February 2025' },
+        { date: '2025-03-26', label: 'Wednesday, 26th March 2025' }
+      ],
+      'sampleData': [
+        { storeId: 'STORE-MAN-001', storeName: 'Manchester Arndale', sku: 'UNI-POLO-BLK-M', productName: 'Staff Uniform - Polo Shirt (Black, M)', qty: 15, valid: true },
+        { storeId: 'STORE-BHM-001', storeName: 'Birmingham Bullring', sku: 'UNI-POLO-BLK-M', productName: 'Staff Uniform - Polo Shirt (Black, M)', qty: 12, valid: true },
+        { storeId: 'STORE-LON-OXF', storeName: 'London Oxford Street', sku: 'UNI-POLO-BLK-M', productName: 'Staff Uniform - Polo Shirt (Black, M)', qty: 20, valid: true },
+        { storeId: 'STORE-LON-OXF', storeName: 'London Oxford Street', sku: 'UNI-POLO-BLK-L', productName: 'Staff Uniform - Polo Shirt (Black, L)', qty: 18, valid: true },
+        { storeId: 'STORE-LED-001', storeName: 'Leeds Trinity', sku: 'UNI-POLO-BLK-M', productName: 'Staff Uniform - Polo Shirt (Black, M)', qty: 10, valid: true }
+      ],
+      get totalLines() {
+        return this.uploadedData.length;
+      },
+      get totalStores() {
+        return new Set(this.uploadedData.map(d => d.storeId)).size;
+      },
+      get totalItems() {
+        return this.uploadedData.reduce((sum, d) => sum + parseInt(d.qty), 0);
+      },
+      get estimatedTotal() {
+        return this.uploadedData.reduce((sum, d) => sum + (14.99 * parseInt(d.qty)), 0);
+      },
+      handleFileUpload(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        this.fileName = file.name;
+        this.uploadedFile = file;
+        this.uploadStep = 'uploading';
+
+        // Simulate file upload
+        setTimeout(() => {
+          // Simulate CSV parsing
+          this.uploadedData = this.sampleData;
+          this.validationErrors = [];
+          this.uploadStep = 2;
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }, 1500);
+      },
+      simulateUpload() {
+        this.fileName = 'bulk_order_200_stores.csv';
+        this.uploadedFile = { name: 'bulk_order_200_stores.csv' };
+        this.uploadStep = 'uploading';
+
+        // Simulate file upload
+        setTimeout(() => {
+          // Simulate CSV parsing
+          this.uploadedData = this.sampleData;
+          this.validationErrors = [];
+          this.uploadStep = 2;
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }, 1500);
+      },
+      downloadTemplate() {
+        const csvContent = 'Store ID,Store Name,Product SKU,Quantity\\n' +
+          'STORE-MAN-001,Manchester Arndale,UNI-POLO-BLK-M,15\\n' +
+          'STORE-BHM-001,Birmingham Bullring,UNI-POLO-BLK-M,12\\n' +
+          'STORE-LON-OXF,London Oxford Street,UNI-POLO-BLK-M,20\\n' +
+          'STORE-LON-OXF,London Oxford Street,UNI-POLO-BLK-L,18\\n' +
+          'STORE-LED-001,Leeds Trinity,UNI-POLO-BLK-M,10';
+
+        const blob = new Blob([csvContent], { type: 'text/csv' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'bulk-order-template.csv';
+        a.click();
+        window.URL.revokeObjectURL(url);
+      },
+      removeRow(index) {
+        this.uploadedData.splice(index, 1);
+      },
+      submitBulkOrder() {
+        alert('Bulk order submitted!\\n\\n' +
+          this.totalLines + ' order lines created\\n' +
+          this.totalStores + ' delivery locations\\n' +
+          this.totalItems + ' total items\\n' +
+          'Dispatch date: ' + this.selectedDispatchDate + '\\n\\n' +
+          'In a live system, this would create all orders and redirect to order confirmation.');
+
+        // Reset
+        this.uploadStep = 1;
+        this.uploadedFile = null;
+        this.fileName = '';
+        this.uploadedData = [];
+      },
+      formatCurrency(amount) {
+        return '£' + amount.toFixed(2);
+      }
+    }"
+    x-init="
+         darkMode = JSON.parse(localStorage.getItem('darkMode'));
+         $watch('darkMode', value => localStorage.setItem('darkMode', JSON.stringify(value)))"
+    :class="{'dark bg-gray-900': darkMode === true}"
+  >
+    <!-- ===== Preloader Start ===== -->
+    <include src="./partials/preloader.html"></include>
+    <!-- ===== Preloader End ===== -->
+
+    <!-- ===== Page Container ===== -->
+    <div class="flex flex-col min-h-screen bg-gray-50 dark:bg-gray-900">
+      <!-- ===== Top Navigation Bar ===== -->
+      <include src="./partials/buyer-nav.html"></include>
+
+      <!-- ===== Main Content ===== -->
+      <main class="flex-1 py-8">
+        <div class="px-4 mx-auto max-w-screen-2xl sm:px-6 lg:px-8">
+          <!-- Page Header -->
+          <div class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Bulk Order Upload</h1>
+            <p class="mt-2 text-gray-600 dark:text-gray-400">
+              Upload orders for multiple stores using a CSV file
+            </p>
+          </div>
+
+          <!-- Progress Steps -->
+          <div class="mb-8">
+            <div class="flex items-center justify-between max-w-3xl mx-auto">
+              <!-- Step 1 -->
+              <div class="flex items-center">
+                <div class="flex items-center justify-center w-10 h-10 rounded-full" :class="uploadStep >= 1 ? 'bg-amber-600 text-white' : 'bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-400'">
+                  <svg x-show="uploadStep > 1" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span x-show="uploadStep === 1">1</span>
+                </div>
+                <span class="ml-3 text-sm font-medium" :class="uploadStep >= 1 ? 'text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400'">Upload File</span>
+              </div>
+
+              <div class="flex-1 h-1 mx-4" :class="uploadStep >= 2 ? 'bg-amber-600' : 'bg-gray-200 dark:bg-gray-700'"></div>
+
+              <!-- Step 2 -->
+              <div class="flex items-center">
+                <div class="flex items-center justify-center w-10 h-10 rounded-full" :class="uploadStep >= 2 ? 'bg-amber-600 text-white' : 'bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-400'">
+                  <svg x-show="uploadStep > 2" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span x-show="uploadStep <= 2">2</span>
+                </div>
+                <span class="ml-3 text-sm font-medium" :class="uploadStep >= 2 ? 'text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400'">Review & Configure</span>
+              </div>
+
+              <div class="flex-1 h-1 mx-4" :class="uploadStep >= 3 ? 'bg-amber-600' : 'bg-gray-200 dark:bg-gray-700'"></div>
+
+              <!-- Step 3 -->
+              <div class="flex items-center">
+                <div class="flex items-center justify-center w-10 h-10 rounded-full" :class="uploadStep >= 3 ? 'bg-amber-600 text-white' : 'bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-400'">
+                  <span>3</span>
+                </div>
+                <span class="ml-3 text-sm font-medium" :class="uploadStep >= 3 ? 'text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400'">Submit</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 1: Upload File -->
+          <div x-show="uploadStep === 1" class="max-w-4xl mx-auto">
+            <!-- Info Box -->
+            <div class="p-6 mb-6 border-l-4 border-amber-500 rounded-lg bg-amber-50 dark:bg-amber-900/20">
+              <div class="flex items-start gap-3">
+                <svg class="w-6 h-6 mt-0.5 text-amber-600 dark:text-amber-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <div>
+                  <p class="font-semibold text-amber-900 dark:text-amber-300">How Bulk Upload Works</p>
+                  <ul class="mt-2 space-y-1 text-sm text-amber-800 dark:text-amber-400">
+                    <li>• Download the CSV template below</li>
+                    <li>• Fill in Store ID, Store Name, Product SKU, and Quantity for each line</li>
+                    <li>• Upload the completed CSV file</li>
+                    <li>• Review and configure dispatch settings</li>
+                    <li>• Submit to create all orders automatically</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <!-- Download Template -->
+            <div class="p-6 mb-6 bg-white border border-gray-200 rounded-2xl dark:bg-gray-800 dark:border-gray-700">
+              <div class="flex items-start justify-between">
+                <div class="flex items-start gap-4">
+                  <div class="flex items-center justify-center w-12 h-12 rounded-lg bg-green-100 dark:bg-green-900/20">
+                    <svg class="w-6 h-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Download CSV Template</h3>
+                    <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">Get the template with sample data and correct column headers</p>
+                    <div class="flex gap-4 mt-4">
+                      <button @click="downloadTemplate()" class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                        </svg>
+                        Download Template
+                      </button>
+                      <a href="#" class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-amber-600 border border-amber-600 rounded-lg hover:bg-amber-50 dark:text-amber-400 dark:border-amber-400 dark:hover:bg-amber-900/20">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        View Store ID List
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Upload Area -->
+            <div class="p-6 bg-white border border-gray-200 rounded-2xl dark:bg-gray-800 dark:border-gray-700">
+              <h3 class="mb-4 text-lg font-semibold text-gray-900 dark:text-white">Upload Your CSV File</h3>
+
+              <!-- Uploading State -->
+              <div x-show="uploadStep === 'uploading'" class="flex flex-col items-center justify-center p-12">
+                <div class="w-16 h-16 mb-4 border-4 border-amber-600 border-t-transparent rounded-full animate-spin"></div>
+                <p class="text-sm font-medium text-gray-900 dark:text-white">Processing file...</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400">Please wait while we parse your CSV</p>
+              </div>
+
+              <!-- Upload Area -->
+              <div x-show="uploadStep === 1">
+                <label class="block">
+                  <div class="flex flex-col items-center justify-center p-12 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer hover:border-amber-500 dark:border-gray-600 dark:hover:border-amber-400">
+                    <svg class="w-12 h-12 mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                    </svg>
+                    <p class="mb-2 text-sm font-semibold text-gray-900 dark:text-white">Click to upload or drag and drop</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">CSV files only (Max 10MB)</p>
+                    <input type="file" class="hidden" accept=".csv" @change="handleFileUpload($event)" />
+                  </div>
+                </label>
+
+                <div class="mt-4">
+                  <p class="text-xs text-gray-500 dark:text-gray-400">
+                    <strong>Required columns:</strong> Store ID, Store Name, Product SKU, Quantity
+                  </p>
+                </div>
+
+                <!-- Demo Button -->
+                <div class="p-4 mt-6 border-t border-gray-200 dark:border-gray-700">
+                  <div class="flex items-center justify-between">
+                    <div>
+                      <p class="text-sm font-medium text-gray-700 dark:text-gray-300">Don't have a file ready?</p>
+                      <p class="text-xs text-gray-500 dark:text-gray-400">Try the demo with sample data</p>
+                    </div>
+                    <button @click="simulateUpload()" class="px-4 py-2 text-sm font-medium text-amber-600 border border-amber-600 rounded-lg hover:bg-amber-50 dark:text-amber-400 dark:border-amber-400 dark:hover:bg-amber-900/20">
+                      Try Demo
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 2: Review & Configure -->
+          <div x-show="uploadStep === 2">
+            <div class="grid grid-cols-1 gap-8 lg:grid-cols-3">
+              <!-- Left: Order Data -->
+              <div class="lg:col-span-2">
+                <!-- Summary Stats -->
+                <div class="grid grid-cols-3 gap-4 mb-6">
+                  <div class="p-4 bg-white border border-gray-200 rounded-lg dark:bg-gray-800 dark:border-gray-700">
+                    <p class="text-sm text-gray-600 dark:text-gray-400">Total Lines</p>
+                    <p class="text-2xl font-bold text-gray-900 dark:text-white" x-text="totalLines"></p>
+                  </div>
+                  <div class="p-4 bg-white border border-gray-200 rounded-lg dark:bg-gray-800 dark:border-gray-700">
+                    <p class="text-sm text-gray-600 dark:text-gray-400">Stores</p>
+                    <p class="text-2xl font-bold text-gray-900 dark:text-white" x-text="totalStores"></p>
+                  </div>
+                  <div class="p-4 bg-white border border-gray-200 rounded-lg dark:bg-gray-800 dark:border-gray-700">
+                    <p class="text-sm text-gray-600 dark:text-gray-400">Total Items</p>
+                    <p class="text-2xl font-bold text-gray-900 dark:text-white" x-text="totalItems"></p>
+                  </div>
+                </div>
+
+                <!-- Uploaded Data Table -->
+                <div class="bg-white border border-gray-200 rounded-2xl dark:bg-gray-800 dark:border-gray-700">
+                  <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+                    <div class="flex items-center justify-between">
+                      <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Order Lines</h3>
+                      <span class="text-sm text-gray-500 dark:text-gray-400">File: <span x-text="fileName"></span></span>
+                    </div>
+                  </div>
+
+                  <div class="overflow-x-auto">
+                    <table class="w-full">
+                      <thead class="bg-gray-50 dark:bg-gray-700/50">
+                        <tr>
+                          <th class="px-4 py-3 text-xs font-medium text-left text-gray-600 uppercase dark:text-gray-400">Store ID</th>
+                          <th class="px-4 py-3 text-xs font-medium text-left text-gray-600 uppercase dark:text-gray-400">Store Name</th>
+                          <th class="px-4 py-3 text-xs font-medium text-left text-gray-600 uppercase dark:text-gray-400">Product</th>
+                          <th class="px-4 py-3 text-xs font-medium text-left text-gray-600 uppercase dark:text-gray-400">Qty</th>
+                          <th class="px-4 py-3 text-xs font-medium text-left text-gray-600 uppercase dark:text-gray-400">Action</th>
+                        </tr>
+                      </thead>
+                      <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                        <template x-for="(row, index) in uploadedData" :key="index">
+                          <tr>
+                            <td class="px-4 py-3 text-sm font-medium text-gray-900 dark:text-white" x-text="row.storeId"></td>
+                            <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-400" x-text="row.storeName"></td>
+                            <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
+                              <p class="font-medium text-gray-900 dark:text-white" x-text="row.productName"></p>
+                              <p class="text-xs text-gray-500 dark:text-gray-500" x-text="row.sku"></p>
+                            </td>
+                            <td class="px-4 py-3 text-sm font-semibold text-gray-900 dark:text-white" x-text="row.qty"></td>
+                            <td class="px-4 py-3">
+                              <button @click="removeRow(index)" class="text-sm text-red-600 hover:text-red-700 dark:text-red-400">Remove</button>
+                            </td>
+                          </tr>
+                        </template>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Right: Configuration -->
+              <div class="lg:col-span-1">
+                <div class="sticky top-24 space-y-6">
+                  <!-- Dispatch Date -->
+                  <div class="p-6 bg-white border border-gray-200 rounded-2xl dark:bg-gray-800 dark:border-gray-700">
+                    <h3 class="mb-4 text-lg font-semibold text-gray-900 dark:text-white">Dispatch Settings</h3>
+
+                    <div class="mb-4">
+                      <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">Dispatch Date</label>
+                      <select x-model="selectedDispatchDate" class="w-full px-3 py-2 border border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                        <template x-for="date in dispatchDates" :key="date.date">
+                          <option :value="date.date" x-text="date.label"></option>
+                        </template>
+                      </select>
+                      <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">Orders are dispatched on the 4th Wednesday of each month</p>
+                    </div>
+
+                    <div>
+                      <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">Cost Center</label>
+                      <select x-model="selectedCostCenter" class="w-full px-3 py-2 border border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                        <option>Uniforms</option>
+                        <option>Packaging & Bags</option>
+                        <option>Store Consumables</option>
+                        <option>Cleaning Supplies</option>
+                        <option>Store Fixtures</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <!-- Order Summary -->
+                  <div class="p-6 bg-white border border-gray-200 rounded-2xl dark:bg-gray-800 dark:border-gray-700">
+                    <h3 class="mb-4 text-lg font-semibold text-gray-900 dark:text-white">Order Summary</h3>
+
+                    <div class="space-y-3">
+                      <div class="flex items-center justify-between pb-3 border-b border-gray-200 dark:border-gray-700">
+                        <span class="text-sm text-gray-600 dark:text-gray-400">Estimated Total</span>
+                        <span class="text-xl font-bold text-gray-900 dark:text-white" x-text="formatCurrency(estimatedTotal)"></span>
+                      </div>
+
+                      <div class="text-xs text-gray-500 dark:text-gray-400">
+                        <p><span x-text="totalLines"></span> order lines</p>
+                        <p><span x-text="totalStores"></span> delivery locations</p>
+                        <p><span x-text="totalItems"></span> total items</p>
+                      </div>
+                    </div>
+
+                    <button @click="submitBulkOrder()" class="flex items-center justify-center w-full gap-2 px-6 py-3 mt-6 text-sm font-medium text-white bg-amber-600 rounded-lg hover:bg-amber-700">
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      Submit Bulk Order
+                    </button>
+
+                    <button @click="uploadStep = 1; uploadedData = []" class="w-full px-6 py-3 mt-3 text-sm font-medium text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700">
+                      Cancel & Start Over
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <!-- ===== Footer ===== -->
+      <footer class="py-6 mt-8 bg-white border-t border-gray-200 dark:bg-gray-800 dark:border-gray-700">
+        <div class="px-4 mx-auto max-w-screen-2xl sm:px-6 lg:px-8">
+          <div class="flex flex-col items-center justify-between gap-4 sm:flex-row">
+            <p class="text-sm text-gray-500 dark:text-gray-400">
+              © 2025 Purbeck Ice Cream. All rights reserved.
+            </p>
+            <div class="flex items-center gap-6 text-sm">
+              <a href="#" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300">Help & Support</a>
+              <a href="#" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300">Terms & Conditions</a>
+              <a href="#" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300">Privacy Policy</a>
+            </div>
+          </div>
+        </div>
+      </footer>
+    </div>
+    <!-- ===== Page Container End ===== -->
+  </body>
+</html>
