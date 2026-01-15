@@ -1,7 +1,6 @@
-# TailAdmin - Free Tailwind Admin Dashboard Template
+# Purbeck Ice Cream - B2B Ordering Demo
 
-TailAdmin is a high-quality, open-source, and **free Tailwind CSS admin template** that is perfect for creating data-rich backends,
-powerful web applications and dashboard-admin projects.
+A demo B2B ordering portal for Purbeck Ice Cream, built with TailAdmin template.
 
 ![TailAdmin Dashboard Preview](./banner.png)
 
